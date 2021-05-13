@@ -31,7 +31,7 @@ class Constants:
     T_SIZE = 3 #: size of selection and replacement tournament
     P_MUT = 1 / N #: per gene probability of mutation
     P_CROSS = 0.8 #: probability of performing crossover
-    M = 1000 #: number of children per parent to test via model
+    M = 100 #: number of children per parent to test via model
     MAX_ARCHIVE = 5000 #: max evaluated individuals for model training
     H = 20 #: number of hidden neurons for MLP
     N_MODELS = 1 #: number of surrogate models (for averaging, and std dev)
