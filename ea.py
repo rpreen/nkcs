@@ -39,7 +39,7 @@ class Ind:
     def mutate(self):
         '''Mutates an individual.'''
         for i in range(cons.N):
-            if np.random.uniform(low=0, high=1) <= cons.P_MUT:
+            if np.random.uniform(low=0, high=1) < cons.P_MUT:
                 if self.genome[i] == 0:
                     self.genome[i] = 1
                 else:
@@ -47,14 +47,14 @@ class Ind:
 
     def one_point_crossover(self, parent):
         '''Performs one-point crossover.'''
-        if np.random.uniform(low=0, high=1) <= cons.P_CROSS:
+        if np.random.uniform(low=0, high=1) < cons.P_CROSS:
             p1 = np.random.randint(0, cons.N)
             for i in range(p1):
                 self.genome[i] = parent.genome[i]
 
     def two_point_crossover(self, parent):
         '''Performs two-point crossover.'''
-        if np.random.uniform(low=0, high=1) <= cons.P_CROSS:
+        if np.random.uniform(low=0, high=1) < cons.P_CROSS:
             p1 = np.random.randint(0, cons.N)
             p2 = np.random.randint(0, cons.N) + 1
             if p1 > p2:
@@ -68,9 +68,9 @@ class Ind:
 
     def uniform_crossover(self, parent):
         '''Performs uniform crossover.'''
-        if np.random.uniform(low=0, high=1) <= cons.P_CROSS:
+        if np.random.uniform(low=0, high=1) < cons.P_CROSS:
             for i in range(cons.N):
-                if np.random.uniform(low=0, high=1) <= 0.5:
+                if np.random.uniform(low=0, high=1) < 0.5:
                     self.genome[i] = parent.genome[i]
 
 class EA:
