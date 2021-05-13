@@ -1,0 +1,23 @@
+# nkcs/surrogate.py: 33
+joblib == 0.14.1
+
+# nkcs/plot.py: 22
+matplotlib == 3.2.1
+
+# nkcs/ea.py: 22
+# nkcs/main.py: 34
+# nkcs/nkcs.py: 22
+# nkcs/perf.py: 23
+# nkcs/plot.py: 23
+# nkcs/surrogate.py: 21
+numpy == 1.17.4
+
+# nkcs/surrogate.py: 27,28,29,30
+scikit_learn == 0.22.2.post1
+
+# nkcs/plot.py: 24
+# nkcs/surrogate.py: 31,32
+scipy == 1.4.1
+
+# nkcs/main.py: 33
+tqdm == 4.45.0
