@@ -24,6 +24,7 @@ from constants import Constants as cons
 
 class NKCS:
     '''NKCS model.'''
+
     def __init__(self):
         '''Initialises a randomly generated NKCS model.'''
         self.species = [self.Species(i) for i in range(cons.S)]
@@ -76,9 +77,9 @@ class NKCS:
 
     def display(self, sp):
         '''Prints a specified NKCS species.'''
-        print("**********************")
-        print("[%d] SPECIES:" % sp)
-        print("**********************")
+        print('**********************')
+        print('[%d] SPECIES:' % sp)
+        print('**********************')
         self.species[sp].display()
 
     class Species:
@@ -119,8 +120,8 @@ class NKCS:
 
         def display(self):
             '''Prints an NKCS species.'''
-            print("con: "+str(self.con))
-            print("fitness table:")
+            print('con: ' + str(self.con))
+            print('fitness table:')
             for i in range(len(self.ftable)):
-                print("Gene (%d)" % i)
+                print('Gene (%d)' % i)
                 print(self.ftable[i])
