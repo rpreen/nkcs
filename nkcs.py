@@ -43,31 +43,31 @@ class NKCS:
         inputs[0] = team[sp].genome[gene_idx] # internal state
         offset = gene_idx * (species.n_gene_inputs - 1) # map offset
         # internal connections
-        cnt = 1
+        cnt = 0
         for _ in range(cons.K):
-            node = species.con[offset + cnt - 1]
-            inputs[cnt] = team[sp].genome[node]
+            node = species.con[offset + cnt]
+            inputs[cnt + 1] = team[sp].genome[node]
             cnt += 1
         # external connections
         if cons.NKCS_TOPOLOGY == 'line':
             if sp != 0:
                 left = cons.S - 1 if sp - 1 < 0 else sp - 1
                 for _ in range(cons.C):
-                    node = species.con[offset + cnt - 1]
-                    inputs[cnt] = team[left].genome[node]
+                    node = species.con[offset + cnt]
+                    inputs[cnt + 1] = team[left].genome[node]
                     cnt += 1
             if sp != cons.S - 1:
                 right = (sp + 1) % cons.S
                 for _ in range(cons.C):
-                    node = species.con[offset + cnt - 1]
-                    inputs[cnt] = team[right].genome[node]
+                    node = species.con[offset + cnt]
+                    inputs[cnt + 1] = team[right].genome[node]
                     cnt += 1
         elif cons.NKCS_TOPOLOGY == 'full':
             for j in range(cons.S):
                 if j != sp:
                     for _ in range(cons.C):
-                        node = species.con[offset + cnt - 1]
-                        inputs[cnt] = team[j].genome[node]
+                        node = species.con[offset + cnt]
+                        inputs[cnt + 1] = team[j].genome[node]
                         cnt += 1
         else:
             print('unsupported NKCS topology')
