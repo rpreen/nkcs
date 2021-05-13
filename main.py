@@ -20,7 +20,9 @@
 
 import os
 import warnings
+from tqdm import tqdm
 from constants import Constants as cons # parameters are in constants.py
+from constants import get_filename
 
 # set number of CPU threads
 os.environ['OMP_NUM_THREADS'] = str(cons.NUM_THREADS)
@@ -30,11 +32,10 @@ os.environ['VECLIB_MAXIMUM_THREADS'] = str(cons.NUM_THREADS)
 os.environ['NUMEXPR_NUM_THREADS'] = str(cons.NUM_THREADS)
 warnings.filterwarnings('ignore') # surpress warnings
 
-from tqdm import tqdm
 import numpy as np
 from nkcs import NKCS
 from ea import EA
-from perf import get_filename, save_data
+from perf import save_data
 from plot import plot
 
 # results storage
@@ -62,7 +63,7 @@ for f in range(cons.F): # F NKCS functions
 bar.close()
 
 # write performance to a file and plot results
-filename = get_filename()
-save_data(filename, evals, perf_best, perf_avg)
+FILENAME = get_filename()
+save_data(FILENAME, evals, perf_best, perf_avg)
 if cons.PLOT:
-    plot([filename], filename)
+    plot([FILENAME], FILENAME)

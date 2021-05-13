@@ -24,26 +24,6 @@ import numpy as np
 from constants import Constants as cons
 from constants import save_constants, read_constants
 
-def get_filename():
-    '''Returns a file name based on the parameters.'''
-    filename = cons.ALGORITHM \
-        + 'f' + str(cons.F) \
-        + 'e' + str(cons.E) \
-        + 'g' + str(cons.G) \
-        + 'p' + str(cons.P) \
-        + 's' + str(cons.S) \
-        + 'n' + str(cons.N) \
-        + 'k' + str(cons.K) \
-        + 'c' + str(cons.C) \
-        + 'TSIZE' + str(cons.T_SIZE) \
-        + 'PMUT' + str(cons.P_MUT) \
-        + 'PCROSS' + str(cons.P_CROSS)
-    if cons.ALGORITHM != 'ea':
-        filename += 'H' + str(cons.H) \
-        + 'MAXARCHIVE' + str(cons.MAX_ARCHIVE) \
-        + 'NMODELS' + str(cons.N_MODELS)
-    return filename
-
 def save_data(filename, evals, perf_best, perf_avg):
     '''Writes the results to a data file.'''
     path = os.path.normpath('res/'+filename+'.dat')

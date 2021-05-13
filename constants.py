@@ -31,7 +31,7 @@ class Constants:
     T_SIZE = 3 #: size of selection and replacement tournament
     P_MUT = 1 / N #: per gene probability of mutation
     P_CROSS = 0.8 #: probability of performing crossover
-    M = 100 #: number of children per parent to test via model
+    M = 1000 #: number of children per parent to test via model
     MAX_ARCHIVE = 5000 #: max evaluated individuals for model training
     H = 20 #: number of hidden neurons for MLP
     N_MODELS = 1 #: number of surrogate models (for averaging, and std dev)
@@ -40,6 +40,27 @@ class Constants:
     MAX_EVALS = P * S * G #: number of evaluations per experiment
     NKCS_TOPOLOGY = 'line' #: topology = {'line', 'full'}
     NUM_THREADS = 8 #: number of CPU threads for model building
+
+def get_filename():
+    '''Returns a file name based on the parameters.'''
+    filename = Constants.ALGORITHM \
+        + 'f' + str(Constants.F) \
+        + 'e' + str(Constants.E) \
+        + 'g' + str(Constants.G) \
+        + 'p' + str(Constants.P) \
+        + 's' + str(Constants.S) \
+        + 'n' + str(Constants.N) \
+        + 'k' + str(Constants.K) \
+        + 'c' + str(Constants.C) \
+        + 'tsize' + str(Constants.T_SIZE) \
+        + 'pmut' + str(Constants.P_MUT) \
+        + 'pcross' + str(Constants.P_CROSS)
+    if Constants.ALGORITHM != 'ea':
+        filename += 'm' + str(Constants.M) \
+        + 'h' + str(Constants.H) \
+        + 'maxarchive' + str(Constants.MAX_ARCHIVE) \
+        + 'nmodels' + str(Constants.N_MODELS)
+    return filename
 
 def save_constants(f):
     '''Writes constants to a data file.'''
