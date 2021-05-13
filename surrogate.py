@@ -28,9 +28,37 @@ from sklearn.gaussian_process.kernels import RBF, Matern, WhiteKernel, ConstantK
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression
+from scipy.stats import norm
 from scipy.optimize import minimize
 from joblib import Parallel, delayed
 from constants import Constants as cons
+
+def get_upper_confidence(model, child):
+    '''Returns the upper confidence bound.'''
+    mu, std = model.predict(child.genome)
+    return mu + std
+
+def get_expected_improvement(model, mu_sample_opt, child):
+    '''Returns expected improvement.'''
+    XI = 0.01
+    mu, std = model.predict(child.genome)
+    ei = 0
+    if std != 0:
+        imp = mu - mu_sample_opt - XI
+        Z = imp / std
+        ei = imp * norm.cdf(Z) + std * norm.pdf(Z)
+    return ei
+
+def get_mean_prediction(model, child):
+    '''Returns surrogate model predicted fitness.'''
+    mu, _ = model.predict(child.genome)
+    return mu
+
+def get_fitness(model, mu_sample_opt, child):
+    '''Returns predicted offspring fitness.'''
+    if cons.ALGORITHM == 'boa':
+        return get_expected_improvement(model, mu_sample_opt, child)
+    return get_mean_prediction(model, child)
 
 def train_model(X, y, seed):
     '''Trains a surrogate model.'''

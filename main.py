@@ -50,11 +50,9 @@ for f in range(cons.F): # F NKCS functions
     for e in range(cons.E): # E experiments
         ea = EA(nkcs, evals[r], perf_best[r], perf_avg[r])
         if cons.ALGORITHM == 'ea':
-            ea.run_cea(nkcs, evals[r], perf_best[r], perf_avg[r])
-        elif cons.ALGORITHM == 'boa':
-            ea.run_boa(nkcs, evals[r], perf_best[r], perf_avg[r])
+            ea.run_ea(nkcs, evals[r], perf_best[r], perf_avg[r])
         else:
-            ea.run_scea(nkcs, evals[r], perf_best[r], perf_avg[r])
+            ea.run_sea(nkcs, evals[r], perf_best[r], perf_avg[r])
         status = ('nkcs (%d) experiment (%d) complete: (%.5f)' %
             (f, e, ea.get_best_fit(0)))
         r += 1

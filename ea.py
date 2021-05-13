@@ -20,9 +20,8 @@
 
 from copy import deepcopy
 import numpy as np
-from scipy.stats import norm
 from constants import Constants as cons
-from surrogate import Model
+import surrogate
 
 class Ind:
     '''A binary NKCS individual within an evolutionary algorithm.'''
@@ -230,8 +229,8 @@ class EA:
         perf_best[gen] = best
         perf_avg[gen] = avg / cons.S
 
-    def run_cea(self, nkcs, evals, pbest, pavg):
-        '''Executes a standard CEA - partnering with the best candidates.'''
+    def run_ea(self, nkcs, evals, pbest, pavg):
+        '''Executes a standard EA - partnering with the best candidates.'''
         while self.evals < cons.MAX_EVALS:
             for s in range(cons.S):
                 p1 = self.pop[s][self.tournament(s)]
@@ -241,60 +240,23 @@ class EA:
                 replace = self.neg_tournament(s)
                 self.pop[s][replace] = deepcopy(child)
 
-    def run_boa(self, nkcs, evals, pbest, pavg):
-        '''Executes a Bayesian optimisation assisted CEA.'''
-        XI = 0.01
+    def run_sea(self, nkcs, evals, pbest, pavg):
+        '''Executes a surrogate-assisted EA.'''
         while self.evals < cons.MAX_EVALS:
             for s in range(cons.S):
-                model = Model()
+                model = surrogate.Model()
                 model.train(self.archive_genes[s], self.archive_fitness[s])
                 # best of M offspring from 1 parent
                 p1 = self.pop[s][self.tournament(s)]
                 p2 = self.pop[s][self.tournament(s)]
                 best = self.create_offspring(p1, p2)
-                mu, std = model.predict(best.genome)
-                # best.fitness = mu
-                # best.fitness = mu + std # upper confidence bound
-                mu_sample_opt = np.max(self.archive_fitness[s])
-                best.fitness = 0
-                if std != 0:
-                    imp = mu - mu_sample_opt - XI
-                    Z = imp / std
-                    ei = imp * norm.cdf(Z) + std * norm.pdf(Z)
-                    best.fitness = ei
+                mu_sample_opt = 0
+                if cons.ALGORITHM == 'boa':
+                    mu_sample_opt = np.max(self.archive_fitness[s])
+                best.fitness = surrogate.get_fitness(model, mu_sample_opt, best)
                 for _ in range(1, cons.M):
                     child = self.create_offspring(p1, p2)
-                    mu, std = model.predict(child.genome)
-                    # child.fitness = mu
-                    # child.fitness = mu + std # upper confidence bound
-                    child.fitness = 0
-                    if std != 0:
-                        imp = mu - mu_sample_opt - XI
-                        Z = imp / std
-                        ei = imp * norm.cdf(Z) + std * norm.pdf(Z)
-                        child.fitness = ei
-                    if child.fitness > best.fitness:
-                        best = child
-                # evaluate best offspring
-                best.fitness = 0
-                self.eval(nkcs, s, best, evals, pbest, pavg)
-                replace = self.neg_tournament(s)
-                self.pop[s][replace] = deepcopy(best)
-
-    def run_scea(self, nkcs, evals, pbest, pavg):
-        '''Executes a surrogate-assisted CEA.'''
-        model = [Model() for s in range(cons.S)]
-        while self.evals < cons.MAX_EVALS:
-            for s in range(cons.S):
-                model[s].train(self.archive_genes[s], self.archive_fitness[s])
-                # best of M offspring from 1 parent
-                p1 = self.pop[s][self.tournament(s)]
-                p2 = self.pop[s][self.tournament(s)]
-                best = self.create_offspring(p1, p2)
-                best.fitness, _ = model[s].predict(best.genome)
-                for _ in range(1, cons.M):
-                    child = self.create_offspring(p1, p2)
-                    child.fitness, _ = model[s].predict(child.genome)
+                    child.fitness = surrogate.get_fitness(model, mu_sample_opt, child)
                     if child.fitness > best.fitness:
                         best = child
                 # evaluate best offspring
