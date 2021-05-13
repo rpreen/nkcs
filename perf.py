@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-'''Functions for reading and writing results to a file..'''
+'''Functions for reading and writing results to a file.'''
 
 import os
 import csv
