@@ -109,10 +109,10 @@ class EA:
 
     def print_archive(self, s):
         '''Prints the evaluated genes and fitnesses of a given species.'''
-        for i in range(len(ea.archive_genes[s])):
+        for i in range(len(self.archive_genes[s])):
             for n in range(cons.N):
-                print(str(ea.archive_genes[s][i][n]), end='')
-            print(',%.5f' % ea.archive_fitness[s][i])
+                print(str(self.archive_genes[s][i][n]), end='')
+            print(',%.5f' % self.archive_fitness[s][i])
 
     def get_fittest(self, s):
         '''Returns the index of the best individual in a given species.'''

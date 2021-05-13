@@ -34,7 +34,8 @@ from tqdm import tqdm
 import numpy as np
 from nkcs import NKCS
 from ea import EA
-from perf import perf_display
+from perf import get_filename, save_data
+from plot import plot
 
 # results storage
 N_RES = cons.F * cons.E
@@ -62,23 +63,8 @@ for f in range(cons.F): # F NKCS functions
         bar.update(1)
 bar.close()
 
-# set the output file name
-filename = cons.ALGORITHM \
-    + 'f' + str(cons.F) \
-    + 'e' + str(cons.E) \
-    + 'g' + str(cons.G) \
-    + 'p' + str(cons.P) \
-    + 's' + str(cons.S) \
-    + 'n' + str(cons.N) \
-    + 'k' + str(cons.K) \
-    + 'c' + str(cons.C) \
-    + 'TSIZE' + str(cons.T_SIZE) \
-    + 'PMUT' + str(cons.P_MUT) \
-    + 'PCROSS' + str(cons.P_CROSS)
-if cons.ALGORITHM != 'ea':
-    filename += 'H' + str(cons.H) \
-    + 'MAXARCHIVE' + str(cons.MAX_ARCHIVE) \
-    + 'NMODELS' + str(cons.N_MODELS)
-
 # write performance to a file and plot results
-perf_display(filename, evals, perf_best, perf_avg)
+filename = get_filename()
+save_data(filename, evals, perf_best, perf_avg)
+if cons.PLOT:
+    plot([filename], filename)

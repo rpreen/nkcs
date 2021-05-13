@@ -22,7 +22,7 @@ class Constants:
     '''Global constants.'''
     F = 10 #: number of different NKCS experiments to run
     E = 10 #: number of experiments per NKCS to run
-    G = 20 #: number of generations to run genetic algorithm
+    G = 10 #: number of generations to run genetic algorithm
     N = 20 #: number of genes (nodes/characteristics)
     K = 2 #: number of connections to other (internal) genes
     C = 2 #: number of external genes affecting each gene
@@ -36,7 +36,46 @@ class Constants:
     H = 20 #: number of hidden neurons for MLP
     N_MODELS = 1 #: number of surrogate models (for averaging, and std dev)
     PLOT = True #: plot graph
-    ALGORITHM = 'boa' #: algorithm = {'ea', 'boa', 'sea'}
+    ALGORITHM = 'ea' #: algorithm = {'ea', 'boa', 'sea'}
     MAX_EVALS = P * S * G #: number of evaluations per experiment
     NKCS_TOPOLOGY = 'line' #: topology = {'line', 'full'}
     NUM_THREADS = 8 #: number of CPU threads for model building
+
+def save_constants(f):
+    '''Writes constants to a data file.'''
+    f.write('%s,' % Constants.ALGORITHM)
+    f.write('%d,' % Constants.F)
+    f.write('%d,' % Constants.E)
+    f.write('%d,' % Constants.G)
+    f.write('%d,' % Constants.P)
+    f.write('%d,' % Constants.S)
+    f.write('%d,' % Constants.N)
+    f.write('%d,' % Constants.K)
+    f.write('%d,' % Constants.C)
+    f.write('%d,' % Constants.T_SIZE)
+    f.write('%f,' % Constants.P_MUT)
+    f.write('%f,' % Constants.P_CROSS)
+    f.write('%d,' % Constants.H)
+    f.write('%d,' % Constants.MAX_ARCHIVE)
+    f.write('%d,' % Constants.N_MODELS)
+    f.write('%s' % Constants.NKCS_TOPOLOGY)
+    f.write('\n')
+
+def read_constants(row):
+    '''Reads constants from a row.'''
+    Constants.ALGORITHM = str(row[0])
+    Constants.F = int(row[1])
+    Constants.E = int(row[2])
+    Constants.G = int(row[3])
+    Constants.P = int(row[4])
+    Constants.S = int(row[5])
+    Constants.N = int(row[6])
+    Constants.K = int(row[7])
+    Constants.C = int(row[8])
+    Constants.T_SIZE = int(row[9])
+    Constants.P_MUT = float(row[10])
+    Constants.P_CROSS = float(row[11])
+    Constants.H = int(row[12])
+    Constants.MAX_ARCHIVE = int(row[13])
+    Constants.N_MODELS = int(row[14])
+    Constants.NKCS_TOPOLOGY = str(row[15])
