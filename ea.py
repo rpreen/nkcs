@@ -57,9 +57,7 @@ class Ind:
             p1 = np.random.randint(0, cons.N)
             p2 = np.random.randint(0, cons.N) + 1
             if p1 > p2:
-                tmp = p1
-                p1 = p2
-                p2 = tmp
+                p1, p2 = p2, p1
             elif p1 == p2:
                 p2 += 1
             for i in range(p1, p2):
@@ -233,9 +231,9 @@ class EA:
         '''Executes a standard EA - partnering with the best candidates.'''
         while self.evals < cons.MAX_EVALS:
             for s in range(cons.S):
-                p1 = self.pop[s][self.tournament(s)]
-                p2 = self.pop[s][self.tournament(s)]
-                child = self.create_offspring(p1, p2)
+                parent1 = self.pop[s][self.tournament(s)]
+                parent2 = self.pop[s][self.tournament(s)]
+                child = self.create_offspring(parent1, parent2)
                 self.eval(nkcs, s, child, evals, pbest, pavg)
                 replace = self.neg_tournament(s)
                 self.pop[s][replace] = deepcopy(child)
@@ -246,16 +244,16 @@ class EA:
             for s in range(cons.S):
                 model = surrogate.Model()
                 model.train(self.archive_genes[s], self.archive_fitness[s])
-                # best of M offspring from 1 parent
-                p1 = self.pop[s][self.tournament(s)]
-                p2 = self.pop[s][self.tournament(s)]
-                best = self.create_offspring(p1, p2)
                 mu_sample_opt = 0
                 if cons.ALGORITHM == 'boa':
                     mu_sample_opt = np.max(self.archive_fitness[s])
+                # best of M offspring from 2 parents
+                parent1 = self.pop[s][self.tournament(s)]
+                parent2 = self.pop[s][self.tournament(s)]
+                best = self.create_offspring(parent1, parent2)
                 best.fitness = surrogate.get_fitness(model, mu_sample_opt, best)
                 for _ in range(1, cons.M):
-                    child = self.create_offspring(p1, p2)
+                    child = self.create_offspring(parent1, parent2)
                     child.fitness = surrogate.get_fitness(model, mu_sample_opt, child)
                     if child.fitness > best.fitness:
                         best = child
