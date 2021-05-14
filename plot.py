@@ -25,19 +25,17 @@ from scipy import stats
 from constants import Constants as cons
 from perf import read_data
 
-FILE_LIST = [ ] # add data file names here
+FILE_LIST = [ ] # add data file names here (without .dat)
 
-PLOT_BESTS = True
-PLOT_AVERAGES = False
-USE_TEX = False
-
+PLOT_BESTS = True #: whether to plot the the best fitnesses
+PLOT_AVERAGES = False #: whether to plot the mean fitnesses
+USE_TEX = False #: whether to use texlive for plot font
 CONF = 1 #: 1.96 = 95% confidence; 1 = standard error
 ALPHA = 0.3 #: transparency for shading confidence bounds
 MS = 5 #: marker size
 ME = 2 #: mark every
 LW = 1 #: line width
-NUM_COLORS = 10
-cm = plt.get_cmap('tab10')
+NUM_COLORS = 10 #: number of line colours
 
 if USE_TEX:
     plt.rc('font',**{'family':'serif','serif':['Palatino']})
@@ -60,6 +58,7 @@ def plot(filenames, plotname):
     '''Plots performance from multiple sets of runs.'''
     fig = plt.figure(figsize=(6, 3))
     ax = fig.add_subplot(1, 1, 1)
+    cm = plt.get_cmap('tab10')
     cycler = plt.cycler(color=[cm(i/NUM_COLORS) for i in range(NUM_COLORS)])
     cycler += plt.cycler(marker=['s', 'o', '^', 'x', '*', '+', 'X'])
     ax.set_prop_cycle(cycler)
