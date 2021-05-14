@@ -88,7 +88,7 @@ class NKCS:
 
         def __init__(self, sp):
             '''Initialises a species with random connectivity.'''
-            X = 0
+            X = 0 #: number of coevolving species
             if cons.S > 1:
                 if cons.NKCS_TOPOLOGY == 'line':
                     if sp in (0, cons.S - 1):
