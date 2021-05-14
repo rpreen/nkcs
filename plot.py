@@ -29,23 +29,32 @@ FILE_LIST = [ ] # add data file names here
 
 PLOT_BESTS = True
 PLOT_AVERAGES = False
-plt.rc('font',**{'family':'serif','serif':['Palatino']})
-params = { 'text.usetex': True, 'text.latex.preamble': r"\usepackage{amstext}" }
-plt.rcParams.update(params)
-CONF = 1 # 1.96 = 95% confidence; 1 = standard error
-ALPHA = 0.3 # transparency for shading confidence bounds
-MS = 5 # marker size
-ME = 2 # mark every
-LW = 1 # line width
+USE_TEX = False
+
+CONF = 1 #: 1.96 = 95% confidence; 1 = standard error
+ALPHA = 0.3 #: transparency for shading confidence bounds
+MS = 5 #: marker size
+ME = 2 #: mark every
+LW = 1 #: line width
 NUM_COLORS = 10
 cm = plt.get_cmap('tab10')
 
+if USE_TEX:
+    plt.rc('font',**{'family':'serif','serif':['Palatino']})
+    params = { 'text.usetex': True, 'text.latex.preamble': r"\usepackage{amstext}" }
+    plt.rcParams.update(params)
+
 def get_title():
     '''Returns the title.'''
-    return '$N$=' + str(cons.N) \
-        + ' $K$=' + str(cons.K) \
-        + ' $C$=' + str(cons.C) \
-        + ' $S$=' + str(cons.S)
+    if USE_TEX:
+        return '$N$=' + str(cons.N) \
+            + ' $K$=' + str(cons.K) \
+            + ' $C$=' + str(cons.C) \
+            + ' $S$=' + str(cons.S)
+    return 'N=' + str(cons.N) \
+        + ' K=' + str(cons.K) \
+        + ' C=' + str(cons.C) \
+        + ' S=' + str(cons.S)
 
 def plot(filenames, plotname):
     '''Plots performance from multiple sets of runs.'''
