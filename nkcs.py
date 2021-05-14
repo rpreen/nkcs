@@ -41,13 +41,12 @@ class NKCS:
         '''Returns the inputs to a gene (including the internal state).'''
         species = self.species[sp] # species containing the gene
         inputs = [0 for i in range(species.n_gene_inputs)] # inputs to the gene
-        inputs[0] = team[sp].genome[gene_idx] # internal state
         offset = gene_idx * (species.n_gene_inputs - 1) # map offset
-        # internal connections
         cnt = 0
+        # internal connections
         for _ in range(cons.K):
             node = species.con[offset + cnt]
-            inputs[cnt + 1] = team[sp].genome[node]
+            inputs[cnt] = team[sp].genome[node]
             cnt += 1
         # external connections
         if cons.NKCS_TOPOLOGY == 'line':
@@ -55,24 +54,26 @@ class NKCS:
                 left = cons.S - 1 if sp - 1 < 0 else sp - 1
                 for _ in range(cons.C):
                     node = species.con[offset + cnt]
-                    inputs[cnt + 1] = team[left].genome[node]
+                    inputs[cnt] = team[left].genome[node]
                     cnt += 1
             if sp != cons.S - 1:
                 right = (sp + 1) % cons.S
                 for _ in range(cons.C):
                     node = species.con[offset + cnt]
-                    inputs[cnt + 1] = team[right].genome[node]
+                    inputs[cnt] = team[right].genome[node]
                     cnt += 1
         elif cons.NKCS_TOPOLOGY == 'full':
             for j in range(cons.S):
                 if j != sp:
                     for _ in range(cons.C):
                         node = species.con[offset + cnt]
-                        inputs[cnt + 1] = team[j].genome[node]
+                        inputs[cnt] = team[j].genome[node]
                         cnt += 1
         else:
             print('unsupported NKCS topology')
             sys.exit()
+        # internal state
+        inputs[cnt] = team[sp].genome[gene_idx]
         return inputs
 
     def display(self, sp):
