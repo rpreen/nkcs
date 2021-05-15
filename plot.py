@@ -87,7 +87,7 @@ def plot(filenames, plotname):
     path = os.path.normpath('res/'+str(plotname)+'.pdf')
     fig.savefig(path, bbox_inches='tight')
 
-##################################################
 # plots all experiments if this script is executed
-if len(FILE_LIST) > 0:
-    plot(FILE_LIST, 'plot')
+if __name__ == '__main__':
+    if len(FILE_LIST) > 0:
+        plot(FILE_LIST, 'plot')
