@@ -80,7 +80,6 @@ class Model:
 
     def __init__(self):
         '''Initialises a surrogate model.'''
-        self.input_scaler = StandardScaler()
         self.output_scaler = StandardScaler()
 
 #        self.models = []
@@ -106,7 +105,7 @@ class Model:
 #
         # THIS ONE!
         rbf = RBF(length_scale=1)
-        self.model = GaussianProcessRegressor(kernel=rbf, normalize_y=True, copy_X_train=False)
+        self.model = GaussianProcessRegressor(kernel=rbf, normalize_y=False, copy_X_train=False)
 
 #        self.model = SVR(kernel='rbf')
 #
@@ -120,11 +119,11 @@ class Model:
     def train(self, X, y):
         '''Trains a surrogate model using the evaluated genomes and fitnesses.'''
         # normalise training data (zero mean and unit variance)
-        self.input_scaler.fit(X)
         y = np.asarray(y).reshape(-1, 1)
         self.output_scaler.fit(y)
-        X_train = self.input_scaler.transform(X)
-        y_train = y # self.output_scaler.transform(y)
+        y_train = self.output_scaler.transform(y)
+        X_train = X # unscaled binary inputs
+
         # fit the model
         self.model.fit(X_train, y_train.ravel())
 #        print('rsquared = ' + str(self.model.score(X_train, y_train.ravel())))
@@ -136,9 +135,7 @@ class Model:
     def predict(self, genome):
         '''Uses the surrogate model to predict the fitness of a genome.'''
         rstd = True # True for GP
-        # normalise input
-        genome = np.asarray(genome).reshape(1, -1)
-        inputs = self.input_scaler.transform(genome)
+        inputs = np.asarray(genome).reshape(1, -1)
 
 #        # NEW!
 #        p = np.zeros(cons.N_MODELS)
@@ -150,7 +147,7 @@ class Model:
 
         # model prediction
         if rstd:
-            fit, std = self.model.predict(inputs, return_std=rstd)
+            fit, std = self.model.predict(inputs, return_std=True)
             return fit, std
         else:
             fit = self.model.predict(inputs)[0]
