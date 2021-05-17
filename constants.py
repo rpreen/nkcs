@@ -44,7 +44,8 @@ class Constants:
 
 def get_filename():
     '''Returns a file name based on the parameters.'''
-    filename = Constants.ALGORITHM \
+    filename = Constants.NKCS_TOPOLOGY \
+        + Constants.ALGORITHM \
         + 'f' + str(Constants.F) \
         + 'e' + str(Constants.E) \
         + 'g' + str(Constants.G) \
