@@ -31,12 +31,13 @@ class Constants:
     T_SIZE = 3 #: size of selection and replacement tournament
     P_MUT = 1 / N #: per gene probability of mutation
     P_CROSS = 0.8 #: probability of performing crossover
-    M = 100 #: number of children per parent to test via model
+    M = 1000 #: number of children per parent to test via model
     MAX_ARCHIVE = 5000 #: max evaluated individuals for model training
     H = 20 #: number of hidden neurons for MLP
-    N_MODELS = 1 #: number of surrogate models (for averaging, and std dev)
+    N_MODELS = 10 #: number of surrogate models (for averaging, and std dev)
     PLOT = True #: plot graph
     ALGORITHM = 'ea' #: algorithm = {'ea', 'boa', 'sea'}
+    MODEL = 'gp' #: surrogate model = {'gp', 'mlp', 'svr', 'linear', 'tree', 'gradient'}
     MAX_EVALS = P * S * G #: number of evaluations per experiment
     NKCS_TOPOLOGY = 'line' #: topology = {'line', 'full'}
     NUM_THREADS = 8 #: number of CPU threads for model building
@@ -59,7 +60,8 @@ def get_filename():
         filename += 'm' + str(Constants.M) \
         + 'h' + str(Constants.H) \
         + 'maxarchive' + str(Constants.MAX_ARCHIVE) \
-        + 'nmodels' + str(Constants.N_MODELS)
+        + 'nmodels' + str(Constants.N_MODELS) \
+        + 'model' + Constants.MODEL
     return filename
 
 def save_constants(f):
@@ -81,6 +83,7 @@ def save_constants(f):
     f.write('%d,' % Constants.MAX_ARCHIVE)
     f.write('%d,' % Constants.N_MODELS)
     f.write('%s' % Constants.NKCS_TOPOLOGY)
+    f.write('%s' % Constants.MODEL)
     f.write('\n')
 
 def read_constants(row):
@@ -102,3 +105,4 @@ def read_constants(row):
     Constants.MAX_ARCHIVE = int(row[14])
     Constants.N_MODELS = int(row[15])
     Constants.NKCS_TOPOLOGY = str(row[16])
+    Constants.MODEL = str(row[17])

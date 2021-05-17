@@ -18,18 +18,17 @@
 
 '''Models for surrogate-assisted evolution.'''
 
+import sys
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPRegressor
 from sklearn.svm import SVR
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import RBF, Matern, WhiteKernel, ConstantKernel
+from sklearn.gaussian_process.kernels import RBF
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression
 from scipy.stats import norm
-from scipy.optimize import minimize
 from joblib import Parallel, delayed
 from constants import Constants as cons
 
@@ -60,15 +59,61 @@ def get_fitness(model, mu_sample_opt, child):
         return get_expected_improvement(model, mu_sample_opt, child)
     return get_mean_prediction(model, child)
 
-def train_model(X, y, seed):
-    '''Trains a surrogate model.'''
+def model_gp(seed):
+    '''Gaussian Process Regressor'''
+    kernel = RBF(length_scale=1)
+    model = GaussianProcessRegressor(kernel=kernel,
+        random_state=seed, normalize_y=False, copy_X_train=False)
+    return model
+
+def model_mlp(seed):
+    '''MLP Regressor'''
     model = MLPRegressor(hidden_layer_sizes=(cons.H,), activation='relu',
-        solver='lbfgs', alpha=0.001, batch_size='auto', learning_rate='adaptive',
+        solver='lbfgs', alpha=0.001, batch_size='auto', learning_rate='constant',
         learning_rate_init=0.01, power_t=0.5, max_iter=1000, shuffle=True,
         random_state=seed, tol=0.0001, verbose=False, warm_start=False,
         momentum=0.9, nesterovs_momentum=True, early_stopping=False,
         validation_fraction=0.1, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-    #model = SVR(kernel='rbf')
+    return model
+
+def model_svr():
+    '''Support Vector Regression'''
+    model = SVR(kernel='rbf')
+    return model
+
+def model_linear():
+    '''Linear Regression'''
+    model = LinearRegression()
+    return model
+
+def model_gradient(seed):
+    '''Gradient Boosting Regressor'''
+    model = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1,
+        max_depth=3, random_state=seed, loss='ls')
+    return model
+
+def model_tree(seed):
+    '''Decision Tree Regressor'''
+    model = DecisionTreeRegressor(random_state=seed)
+    return model
+
+def train_model(X, y, seed=None):
+    '''Trains a surrogate model.'''
+    if cons.MODEL == 'gp':
+        model = model_gp(seed)
+    elif cons.MODEL == 'mlp':
+        model = model_mlp(seed)
+    elif cons.MODEL == 'svr':
+        model = model_svr()
+    elif cons.MODEL == 'tree':
+        model = model_tree(seed)
+    elif cons.MODEL == 'linear':
+        model = model_linear()
+    elif cons.MODEL == 'gradient':
+        model = model_gradient(seed)
+    else:
+        print('unsupported surrogate model')
+        sys.exit()
     return model.fit(X, y)
 
 def test_model(model, X):
@@ -81,74 +126,45 @@ class Model:
     def __init__(self):
         '''Initialises a surrogate model.'''
         self.output_scaler = StandardScaler()
-
-#        self.models = []
-
-#        self.model = MLPRegressor(hidden_layer_sizes=(cons.H,), activation='tanh',
-#            solver='lbfgs', alpha=0.001, batch_size='auto', learning_rate='adaptive',
-#            learning_rate_init=0.01, power_t=0.5, max_iter=1000, shuffle=True,
-#            random_state=None, tol=0.0001, verbose=False, warm_start=False,
-#            momentum=0.9, nesterovs_momentum=True, early_stopping=False,
-#            validation_fraction=0.1, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-
-#        self.model = MLPRegressor(hidden_layer_sizes=(cons.H,), activation='relu',
-#            solver='lbfgs', alpha=0.001, batch_size='auto', learning_rate='constant',
-#            learning_rate_init=0.01, power_t=0.5, max_iter=1000, shuffle=True,
-#            random_state=None, tol=0.0001, verbose=False, warm_start=False,
-#            momentum=0.9, nesterovs_momentum=True, early_stopping=False,
-#            validation_fraction=0.1, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-
-#        kernel = ConstantKernel(1, constant_value_bounds='fixed') * RBF(length_scale=1)
-#        self.model = GaussianProcessRegressor(kernel=kernel, alpha=1e-10,
-#            optimizer='fmin_l_bfgs_b', n_restarts_optimizer=0, normalize_y=True,
-#            copy_X_train=False, random_state=None)
-#
-        # THIS ONE!
-        rbf = RBF(length_scale=1)
-        self.model = GaussianProcessRegressor(kernel=rbf, normalize_y=False, copy_X_train=False)
-
-#        self.model = SVR(kernel='rbf')
-#
-#        self.model = DecisionTreeRegressor()
-
-#        self.model = LinearRegression()
-
-#        self.model = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1,
-#            max_depth=3, random_state=None, loss='ls')
+        self.models = []
 
     def train(self, X, y):
         '''Trains a surrogate model using the evaluated genomes and fitnesses.'''
         # normalise training data (zero mean and unit variance)
         y = np.asarray(y).reshape(-1, 1)
         self.output_scaler.fit(y)
-        y_train = self.output_scaler.transform(y)
+        y_train = self.output_scaler.transform(y).ravel()
         X_train = X # unscaled binary inputs
-
-        # fit the model
-        self.model.fit(X_train, y_train.ravel())
-#        print('rsquared = ' + str(self.model.score(X_train, y_train.ravel())))
-
-#        # returns fitted models
-#        self.models = Parallel(n_jobs=cons.NUM_THREADS)(
-#            delayed (train_model)(X, y, seed) for seed in range(cons.N_MODELS))
+        # fit models
+        if cons.MODEL == 'gp':
+            self.models.append(train_model(X_train, y_train))
+        else:
+            self.models = Parallel(n_jobs=cons.NUM_THREADS)(delayed
+                (train_model)(X_train, y_train) for _ in range(cons.N_MODELS))
 
     def predict(self, genome):
         '''Uses the surrogate model to predict the fitness of a genome.'''
-        rstd = True # True for GP
         inputs = np.asarray(genome).reshape(1, -1)
-
-#        # NEW!
-#        p = np.zeros(cons.N_MODELS)
-#        for i in range(cons.N_MODELS):
-#            p[i] = self.models[i].predict(inputs.reshape(1,-1))[0]
-#        fit = np.mean(p)
-#        std = np.std(p)
-#        return fit, std
-
-        # model prediction
-        if rstd:
-            fit, std = self.model.predict(inputs, return_std=True)
-            return fit, std
+        # only one GP model
+        if cons.MODEL == 'gp': # only one GP model
+            fit, std = self.models[0].predict(inputs, return_std=True)
+            fit = fit[0] # single sample
+            std = std[0]
+        # model prediction(s)
         else:
-            fit = self.model.predict(inputs)[0]
-            return fit, 0
+            N = len(self.models)
+            p = np.zeros(N)
+            for i in range(N):
+                p[i] = self.models[i].predict(inputs)[0]
+            if N > 1:
+                fit = np.mean(p)
+                std = np.std(p)
+            else:
+                fit = p[0]
+                std = 0
+        return fit, std
+
+    def print_score(self, X, y):
+        '''Prints the R squared model scores.'''
+        for model in self.models:
+            print('rsquared = ' + str(model.score(X, y)))

@@ -54,6 +54,14 @@ def get_title():
         + ' C=' + str(cons.C) \
         + ' S=' + str(cons.S)
 
+def get_label(l):
+    '''Returns the plot label.'''
+    L = cons.ALGORITHM.upper()
+    if cons.ALGORITHM != 'ea':
+        L += '-' + cons.MODEL.upper()
+    L += ' ' + l
+    return L
+
 def plot(filenames, plotname):
     '''Plots performance from multiple sets of runs.'''
     fig = plt.figure(figsize=(6, 3))
@@ -66,15 +74,14 @@ def plot(filenames, plotname):
         evals, perf_best, perf_avg = read_data(data)
         mean_best = np.mean(perf_best, axis=0)
         mean_avg = np.mean(perf_avg, axis=0)
-        L = cons.ALGORITHM.upper() + ' '
         if PLOT_BESTS:
             ax.plot(evals, mean_best,
-                linewidth=LW, markersize=MS, markevery=ME, label=L+'Best')
+                linewidth=LW, markersize=MS, markevery=ME, label=get_label('best'))
             ax.fill_between(evals, mean_best - (CONF * stats.sem(perf_best, axis=0)),
                 mean_best + (CONF * stats.sem(perf_best, axis=0)), alpha=ALPHA)
         if PLOT_AVERAGES:
             ax.plot(evals, mean_avg,
-                linewidth=LW, markersize=MS, markevery=ME, label=L+'Avg.')
+                linewidth=LW, markersize=MS, markevery=ME, label=get_label('avg'))
             ax.fill_between(evals, mean_avg - (CONF * stats.sem(perf_avg, axis=0)),
                 mean_avg + (CONF * stats.sem(perf_avg, axis=0)), alpha=ALPHA)
     ax.grid(linestyle='dotted', linewidth=1)
