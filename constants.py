@@ -39,7 +39,7 @@ class Constants:
     ALGORITHM = 'ea' #: algorithm = {'ea', 'boa', 'sea'}
     MODEL = 'gp' #: surrogate model = {'gp', 'mlp', 'svr', 'linear', 'tree', 'gradient'}
     MAX_EVALS = P * S * G #: number of evaluations per experiment
-    NKCS_TOPOLOGY = 'line' #: topology = {'line', 'full'}
+    NKCS_TOPOLOGY = 'standard' #: topology = {'line', 'standard'}
     NUM_THREADS = 8 #: number of CPU threads for model building
 
 def get_filename():

@@ -62,7 +62,7 @@ class NKCS:
                     node = species.con[offset + cnt]
                     inputs[cnt] = team[right].genome[node]
                     cnt += 1
-        elif cons.NKCS_TOPOLOGY == 'full':
+        elif cons.NKCS_TOPOLOGY == 'standard':
             for j in range(cons.S):
                 if j != sp:
                     for _ in range(cons.C):
@@ -95,7 +95,7 @@ class NKCS:
                         X = 1
                     else:
                         X = 2
-                elif cons.NKCS_TOPOLOGY == 'full': # standard NKCS
+                elif cons.NKCS_TOPOLOGY == 'standard':
                     X = cons.S - 1
                 else:
                     print('unsupported NKCS topology')
