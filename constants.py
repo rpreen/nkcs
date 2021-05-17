@@ -82,7 +82,7 @@ def save_constants(f):
     f.write('%d,' % Constants.H)
     f.write('%d,' % Constants.MAX_ARCHIVE)
     f.write('%d,' % Constants.N_MODELS)
-    f.write('%s' % Constants.NKCS_TOPOLOGY)
+    f.write('%s,' % Constants.NKCS_TOPOLOGY)
     f.write('%s' % Constants.MODEL)
     f.write('\n')
 
