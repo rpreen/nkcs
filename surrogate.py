@@ -32,9 +32,8 @@ from scipy.stats import norm
 from joblib import Parallel, delayed
 from constants import Constants as cons
 
-def expected_improvement(mu_sample_opt, mu, std):
+def expected_improvement(mu_sample_opt, mu, std, XI=0.01):
     '''Returns expected improvement.'''
-    XI = 0.01
     ei = 0
     if std != 0:
         imp = mu - mu_sample_opt - XI
