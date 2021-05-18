@@ -32,15 +32,9 @@ from scipy.stats import norm
 from joblib import Parallel, delayed
 from constants import Constants as cons
 
-def get_upper_confidence(model, child):
-    '''Returns the upper confidence bound.'''
-    mu, std = model.predict(child.genome)
-    return mu + std
-
-def get_expected_improvement(model, mu_sample_opt, child):
+def expected_improvement(mu_sample_opt, mu, std):
     '''Returns expected improvement.'''
     XI = 0.01
-    mu, std = model.predict(child.genome)
     ei = 0
     if std != 0:
         imp = mu - mu_sample_opt - XI
@@ -48,16 +42,14 @@ def get_expected_improvement(model, mu_sample_opt, child):
         ei = imp * norm.cdf(Z) + std * norm.pdf(Z)
     return ei
 
-def get_mean_prediction(model, child):
-    '''Returns surrogate model predicted fitness.'''
-    mu, _ = model.predict(child.genome)
-    return mu
-
 def get_fitness(model, mu_sample_opt, child):
     '''Returns predicted offspring fitness.'''
-    if cons.ALGORITHM == 'boa':
-        return get_expected_improvement(model, mu_sample_opt, child)
-    return get_mean_prediction(model, child)
+    mu, std = model.predict(child.genome)
+    if cons.ALGORITHM == 'ei':
+        return expected_improvement(mu_sample_opt, mu, std)
+    elif cons.ALGORITHM == 'uc':
+        return mu + std # upper confidence
+    return mu # mean
 
 def model_gp(seed):
     '''Gaussian Process Regressor'''

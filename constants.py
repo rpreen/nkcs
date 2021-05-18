@@ -36,7 +36,7 @@ class Constants:
     H = 20 #: number of hidden neurons for MLP
     N_MODELS = 10 #: number of surrogate models (for averaging, and std dev)
     PLOT = True #: plot graph
-    ALGORITHM = 'ea' #: algorithm = {'ea', 'boa', 'sea'}
+    ALGORITHM = 'ea' #: algorithm = {'ea', 'ei', 'upper', 'mean'}
     MODEL = 'gp' #: surrogate model = {'gp', 'mlp', 'svr', 'linear', 'tree', 'gradient'}
     MAX_EVALS = P * S * G #: number of evaluations per experiment
     NKCS_TOPOLOGY = 'standard' #: topology = {'line', 'standard'}
