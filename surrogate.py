@@ -38,8 +38,7 @@ def acquisition(mu_sample_opt, mu, std):
         XI = 0.01
         imp = mu - mu_sample_opt - XI
         Z = imp / (std + 1E-9)
-        ei = imp * norm.cdf(Z) + (std + 1E-9) * norm.pdf(Z)
-        return ei
+        return imp * norm.cdf(Z) + (std + 1E-9) * norm.pdf(Z)
     if cons.ACQUISITION == 'uc': # upper confidence
         return mu + std
     if cons.ACQUISITION == 'pi': # probability of improvement
