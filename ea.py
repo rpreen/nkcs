@@ -248,15 +248,14 @@ class EA:
                 # best of M offspring from 2 parents
                 parent1 = self.pop[s][self.tournament(s)]
                 parent2 = self.pop[s][self.tournament(s)]
-                best = self.create_offspring(parent1, parent2)
-                best.fitness = surrogate.get_fitness(model, mu_sample_opt, best)
-                for _ in range(1, cons.M):
-                    child = self.create_offspring(parent1, parent2)
-                    child.fitness = surrogate.get_fitness(model, mu_sample_opt, child)
-                    if child.fitness > best.fitness:
-                        best = child
-                # evaluate best offspring
-                best.fitness = 0
-                self.eval(nkcs, s, best, evals, pbest, pavg)
+                candidates = []
+                for _ in range(0, cons.M):
+                    candidates.append(self.create_offspring(parent1, parent2).genome)
+                scores = surrogate.score(model, candidates, mu_sample_opt)
+                child = Ind()
+                child.genome = candidates[np.argmax(scores)]
+                child.fitness = 0
+                # evaluate offspring
+                self.eval(nkcs, s, child, evals, pbest, pavg)
                 replace = self.neg_tournament(s)
-                self.pop[s][replace] = deepcopy(best)
+                self.pop[s][replace] = deepcopy(child)

@@ -32,22 +32,24 @@ from scipy.stats import norm
 from joblib import Parallel, delayed
 from constants import Constants as cons
 
-def get_fitness(model, mu_sample_opt, child):
-    '''Returns predicted offspring fitness.'''
-    mu, std = model.predict(child.genome)
+def acquisition(mu_sample_opt, mu, std):
+    '''Applies the acquisition function to predicted samples.'''
     if cons.ACQUISITION == 'ei': # expected improvement
         XI = 0.01
-        ei = 0
-        if std != 0:
-            imp = mu - mu_sample_opt - XI
-            Z = imp / std
-            ei = imp * norm.cdf(Z) + std * norm.pdf(Z)
+        imp = mu - mu_sample_opt - XI
+        Z = imp / (std + 1E-9)
+        ei = imp * norm.cdf(Z) + (std + 1E-9) * norm.pdf(Z)
         return ei
     if cons.ACQUISITION == 'uc': # upper confidence
         return mu + std
     if cons.ACQUISITION == 'pi': # probability of improvement
         return norm.cdf((mu - mu_sample_opt) / (std + 1E-9))
     return mu # mean
+
+def score(model, candidates, mu_sample_opt):
+    '''Scores candidates and returns predicted fitnesses.'''
+    mu, std = model.predict(candidates)
+    return acquisition(mu_sample_opt, mu, std)
 
 def model_gp(seed):
     '''Gaussian Process Regressor'''
@@ -132,23 +134,21 @@ class Model:
             self.models = Parallel(n_jobs=cons.NUM_THREADS)(delayed
                 (train_model)(X_train, y_train) for _ in range(cons.N_MODELS))
 
-    def predict(self, genome):
-        '''Uses the surrogate model to predict the fitness of a genome.'''
-        inputs = np.asarray(genome).reshape(1, -1)
+    def predict(self, candidates):
+        '''Uses the surrogate model to predict the fitnesses of candidate genomes.'''
         # only one GP model
         if cons.MODEL == 'gp': # only one GP model
-            fit, std = self.models[0].predict(inputs, return_std=True)
-            fit = fit[0] # single sample
-            std = std[0]
+            fit, std = self.models[0].predict(candidates, return_std=True)
         # model prediction(s)
         else:
-            N = len(self.models)
-            p = np.zeros(N)
-            for i in range(N):
-                p[i] = self.models[i].predict(inputs)[0]
-            if N > 1:
-                fit = np.mean(p)
-                std = np.std(p)
+            n_models = len(self.models)
+            n_samples = len(candidates)
+            p = np.zeros((n_models, n_samples))
+            for i in range(n_models):
+                p[i] = self.models[i].predict(candidates)
+            if n_models > 1:
+                fit = np.mean(p, axis=0)
+                std = np.std(p, axis=0)
             else:
                 fit = p[0]
                 std = 0
