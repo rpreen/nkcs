@@ -32,22 +32,21 @@ from scipy.stats import norm
 from joblib import Parallel, delayed
 from constants import Constants as cons
 
-def expected_improvement(mu_sample_opt, mu, std, XI=0.01):
-    '''Returns expected improvement.'''
-    ei = 0
-    if std != 0:
-        imp = mu - mu_sample_opt - XI
-        Z = imp / std
-        ei = imp * norm.cdf(Z) + std * norm.pdf(Z)
-    return ei
-
 def get_fitness(model, mu_sample_opt, child):
     '''Returns predicted offspring fitness.'''
     mu, std = model.predict(child.genome)
-    if cons.ACQUISITION == 'ei':
-        return expected_improvement(mu_sample_opt, mu, std)
-    elif cons.ACQUISITION == 'uc':
-        return mu + std # upper confidence
+    if cons.ACQUISITION == 'ei': # expected improvement
+        XI = 0.01
+        ei = 0
+        if std != 0:
+            imp = mu - mu_sample_opt - XI
+            Z = imp / std
+            ei = imp * norm.cdf(Z) + std * norm.pdf(Z)
+        return ei
+    if cons.ACQUISITION == 'uc': # upper confidence
+        return mu + std
+    if cons.ACQUISITION == 'pi': # probability of improvement
+        return norm.cdf((mu - mu_sample_opt) / (std + 1E-9))
     return mu # mean
 
 def model_gp(seed):
