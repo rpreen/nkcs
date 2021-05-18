@@ -50,7 +50,7 @@ for f in range(cons.F): # F NKCS functions
     nkcs = NKCS()
     for e in range(cons.E): # E experiments
         ea = EA(nkcs, evals[r], perf_best[r], perf_avg[r])
-        if cons.ALGORITHM == 'ea':
+        if cons.ACQUISITION == 'ea':
             ea.run_ea(nkcs, evals[r], perf_best[r], perf_avg[r])
         else:
             ea.run_sea(nkcs, evals[r], perf_best[r], perf_avg[r])

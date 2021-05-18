@@ -56,8 +56,8 @@ def get_title():
 
 def get_label(l):
     '''Returns the plot label.'''
-    L = cons.ALGORITHM.upper()
-    if cons.ALGORITHM != 'ea':
+    L = cons.ACQUISITION.upper()
+    if cons.ACQUISITION != 'ea':
         L += '-' + cons.MODEL.upper()
     L += ' ' + l
     return L

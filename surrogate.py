@@ -44,9 +44,9 @@ def expected_improvement(mu_sample_opt, mu, std, XI=0.01):
 def get_fitness(model, mu_sample_opt, child):
     '''Returns predicted offspring fitness.'''
     mu, std = model.predict(child.genome)
-    if cons.ALGORITHM == 'ei':
+    if cons.ACQUISITION == 'ei':
         return expected_improvement(mu_sample_opt, mu, std)
-    elif cons.ALGORITHM == 'uc':
+    elif cons.ACQUISITION == 'uc':
         return mu + std # upper confidence
     return mu # mean
 

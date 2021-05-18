@@ -36,7 +36,7 @@ class Constants:
     H = 20 #: number of hidden neurons for MLP
     N_MODELS = 10 #: number of surrogate models (for averaging, and std dev)
     PLOT = True #: plot graph
-    ALGORITHM = 'ea' #: algorithm = {'ea', 'ei', 'upper', 'mean'}
+    ACQUISITION = 'ea' #: algorithm = {'ea', 'ei', 'upper', 'mean'}
     MODEL = 'gp' #: surrogate model = {'gp', 'mlp', 'svr', 'linear', 'tree', 'gradient'}
     MAX_EVALS = P * S * G #: number of evaluations per experiment
     NKCS_TOPOLOGY = 'standard' #: topology = {'line', 'standard'}
@@ -45,7 +45,7 @@ class Constants:
 def get_filename():
     '''Returns a file name based on the parameters.'''
     filename = Constants.NKCS_TOPOLOGY \
-        + Constants.ALGORITHM \
+        + Constants.ACQUISITION \
         + 'f' + str(Constants.F) \
         + 'e' + str(Constants.E) \
         + 'g' + str(Constants.G) \
@@ -57,7 +57,7 @@ def get_filename():
         + 'tsize' + str(Constants.T_SIZE) \
         + 'pmut' + str(Constants.P_MUT) \
         + 'pcross' + str(Constants.P_CROSS)
-    if Constants.ALGORITHM != 'ea':
+    if Constants.ACQUISITION != 'ea':
         filename += 'm' + str(Constants.M) \
         + 'h' + str(Constants.H) \
         + 'maxarchive' + str(Constants.MAX_ARCHIVE) \
@@ -67,7 +67,7 @@ def get_filename():
 
 def save_constants(f):
     '''Writes constants to a data file.'''
-    f.write('%s,' % Constants.ALGORITHM)
+    f.write('%s,' % Constants.ACQUISITION)
     f.write('%d,' % Constants.F)
     f.write('%d,' % Constants.E)
     f.write('%d,' % Constants.G)
@@ -89,7 +89,7 @@ def save_constants(f):
 
 def read_constants(row):
     '''Reads constants from a row.'''
-    Constants.ALGORITHM = str(row[0])
+    Constants.ACQUISITION = str(row[0])
     Constants.F = int(row[1])
     Constants.E = int(row[2])
     Constants.G = int(row[3])
