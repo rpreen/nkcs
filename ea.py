@@ -244,9 +244,7 @@ class EA:
             for s in range(cons.S):
                 model = surrogate.Model()
                 model.train(self.archive_genes[s], self.archive_fitness[s])
-                mu_sample_opt = 0
-                if cons.ALGORITHM == 'boa':
-                    mu_sample_opt = np.max(self.archive_fitness[s])
+                mu_sample_opt = np.max(self.archive_fitness[s])
                 # best of M offspring from 2 parents
                 parent1 = self.pop[s][self.tournament(s)]
                 parent2 = self.pop[s][self.tournament(s)]
