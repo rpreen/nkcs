@@ -249,7 +249,7 @@ class EA:
                 parent1 = self.pop[s][self.tournament(s)]
                 parent2 = self.pop[s][self.tournament(s)]
                 candidates = []
-                for _ in range(0, cons.M):
+                for _ in range(cons.M):
                     candidates.append(self.create_offspring(parent1, parent2).genome)
                 scores = surrogate.score(model, candidates, mu_sample_opt)
                 child = Ind()
