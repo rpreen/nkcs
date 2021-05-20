@@ -217,10 +217,11 @@ class EA:
         '''Adds an offspring to the species population.'''
         if cons.REPLACE == 'tournament':
             replace = self.neg_tournament(s)
+            self.pop[s][replace] = deepcopy(child)
         else:
             replace = self.worst(s)
-        if self.pop[s][replace].fitness < child.fitness:
-            self.pop[s][replace] = deepcopy(child)
+            if self.pop[s][replace].fitness < child.fitness:
+                self.pop[s][replace] = deepcopy(child)
 
     def create_offspring(self, p1, p2):
         '''Creates and returns a new offspring.'''
