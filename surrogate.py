@@ -48,40 +48,34 @@ def acquisition(mu_sample_opt, mu, std):
 def model_gp(seed):
     '''Gaussian Process Regressor'''
     kernel = RBF(length_scale=1)
-    model = GaussianProcessRegressor(kernel=kernel,
+    return GaussianProcessRegressor(kernel=kernel,
         random_state=seed, normalize_y=False, copy_X_train=False)
-    return model
 
 def model_mlp(seed):
     '''MLP Regressor'''
-    model = MLPRegressor(hidden_layer_sizes=(cons.H,), activation='relu',
+    return MLPRegressor(hidden_layer_sizes=(cons.H,), activation='relu',
         solver='lbfgs', alpha=0.001, batch_size='auto', learning_rate='constant',
         learning_rate_init=0.01, power_t=0.5, max_iter=1000, shuffle=True,
         random_state=seed, tol=0.0001, verbose=False, warm_start=False,
         momentum=0.9, nesterovs_momentum=True, early_stopping=True,
         validation_fraction=0.1, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-    return model
 
 def model_svr():
     '''Support Vector Regression'''
-    model = SVR(kernel='rbf')
-    return model
+    return SVR(kernel='rbf')
 
 def model_linear():
     '''Linear Regression'''
-    model = LinearRegression()
-    return model
+    return LinearRegression()
 
 def model_gradient(seed):
     '''Gradient Boosting Regressor'''
-    model = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1,
+    return GradientBoostingRegressor(n_estimators=100, learning_rate=0.1,
         max_depth=3, random_state=seed, loss='ls')
-    return model
 
 def model_tree(seed):
     '''Decision Tree Regressor'''
-    model = DecisionTreeRegressor(random_state=seed)
-    return model
+    return DecisionTreeRegressor(random_state=seed)
 
 def fit_model(X, y, seed=None):
     '''Trains a surrogate model.'''
