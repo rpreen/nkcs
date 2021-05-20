@@ -253,7 +253,6 @@ class EA:
                 scores = model.predict(candidates)
                 child = Ind()
                 child.genome = candidates[np.argmax(scores)]
-                child.fitness = 0
                 # evaluate offspring
                 self.eval(nkcs, s, child, evals, pbest, pavg)
                 replace = self.neg_tournament(s)
