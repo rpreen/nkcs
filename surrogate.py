@@ -130,8 +130,7 @@ class Model:
         '''Uses the surrogate model to predict the fitnesses of candidate genomes.'''
         if cons.MODEL == 'gp': # only one GP model
             mu, std = self.models[0].predict(X, return_std=True)
-        # model prediction(s)
-        else:
+        else: # model prediction(s)
             n_models = len(self.models)
             n_samples = len(X)
             p = np.zeros((n_models, n_samples))
