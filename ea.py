@@ -111,7 +111,7 @@ class EA:
         team = []
         for s in range(cons.S):
             if s != sp:
-                team.append(self.pop[s][self.get_fittest(s)])
+                team.append(self.pop[s][self.get_best(s)])
             else:
                 team.append(child)
         self.eval_team(nkcs, team, evals, pbest, pavg)
@@ -202,19 +202,17 @@ class EA:
                 worst = i
         return worst
 
-    def get_fittest(self, s):
+    def get_best(self, s):
         '''Returns the index of the best individual in a given species.'''
         best = 0
-        fbest = self.pop[s][best].fitness
         for i in range(1, cons.P):
-            if self.pop[s][i].fitness > fbest:
+            if self.pop[s][i].fitness > self.pop[s][best].fitness:
                 best = i
-                fbest = self.pop[s][i].fitness
         return best
 
     def get_best_fit(self, s):
         '''Returns the fitness of the best individual in a given species.'''
-        return self.pop[s][self.get_fittest(s)].fitness
+        return self.pop[s][self.get_best(s)].fitness
 
     def get_avg_fit(self, s):
         '''Returns the average fitness of a given species.'''
