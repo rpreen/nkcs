@@ -216,11 +216,10 @@ class EA:
 
     def get_avg_fit(self, s):
         '''Returns the average fitness of a given species.'''
-        avg = 0
+        total = 0
         for i in range(cons.P):
-            avg += self.pop[s][i].fitness
-        avg /= cons.P
-        return avg
+            total += self.pop[s][i].fitness
+        return total / cons.P
 
     def print_archive(self, s):
         '''Prints the evaluated genes and fitnesses of a given species.'''
