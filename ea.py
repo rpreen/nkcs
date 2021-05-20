@@ -185,7 +185,7 @@ class EA:
         '''Returns a parent selected by tournament.'''
         best = np.random.randint(0, cons.P)
         fbest = self.pop[s][best].fitness
-        for _ in range(0, cons.T_SIZE):
+        for _ in range(cons.T_SIZE):
             competitor = np.random.randint(0, cons.P)
             fcompetitor = self.pop[s][competitor].fitness
             if fcompetitor > fbest:
@@ -197,7 +197,7 @@ class EA:
         '''Returns an individual selected by negative tournament.'''
         worst = np.random.randint(0, cons.P)
         fworst = self.pop[s][worst].fitness
-        for _ in range(0, cons.T_SIZE):
+        for _ in range(cons.T_SIZE):
             competitor = np.random.randint(0, cons.P)
             fcompetitor = self.pop[s][competitor].fitness
             if fcompetitor < fworst:
