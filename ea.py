@@ -205,6 +205,23 @@ class EA:
                 fworst = fcompetitor
         return worst
 
+    def worst(self, s):
+        '''Returns the index of the least fit individual in a species.'''
+        worst = 0
+        for i in range(1, cons.P):
+            if self.pop[s][i].fitness < self.pop[s][worst].fitness:
+                worst = i
+        return worst
+
+    def add_offspring(self, s, child):
+        '''Adds an offspring to the species population.'''
+        if cons.REPLACE == 'tournament':
+            replace = self.neg_tournament(s)
+        else:
+            replace = self.worst(s)
+        if self.pop[s][replace].fitness < child.fitness:
+            self.pop[s][replace] = deepcopy(child)
+
     def create_offspring(self, p1, p2):
         '''Creates and returns a new offspring.'''
         child = deepcopy(p1)
@@ -235,8 +252,7 @@ class EA:
                 parent2 = self.pop[s][self.tournament(s)]
                 child = self.create_offspring(parent1, parent2)
                 self.eval(nkcs, s, child, evals, pbest, pavg)
-                replace = self.neg_tournament(s)
-                self.pop[s][replace] = deepcopy(child)
+                self.add_offspring(s, child)
 
     def run_sea(self, nkcs, evals, pbest, pavg):
         '''Executes a surrogate-assisted EA.'''
@@ -255,5 +271,4 @@ class EA:
                 child.genome = candidates[np.argmax(scores)]
                 # evaluate offspring
                 self.eval(nkcs, s, child, evals, pbest, pavg)
-                replace = self.neg_tournament(s)
-                self.pop[s][replace] = deepcopy(child)
+                self.add_offspring(s, child)

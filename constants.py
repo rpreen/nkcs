@@ -31,6 +31,7 @@ class Constants:
     T_SIZE = 3 #: size of selection and replacement tournament
     P_MUT = 1 / N #: per gene probability of mutation
     P_CROSS = 0.8 #: probability of performing crossover
+    REPLACE = 'worst' #: replace = {'worst', 'tournament'}
     M = 1000 #: number of children per parent to test via model
     MAX_ARCHIVE = 5000 #: max evaluated individuals for model training
     H = 20 #: number of hidden neurons for MLP
@@ -56,7 +57,8 @@ def get_filename():
         + 'c' + str(Constants.C) \
         + 'tsize' + str(Constants.T_SIZE) \
         + 'pmut' + str(Constants.P_MUT) \
-        + 'pcross' + str(Constants.P_CROSS)
+        + 'pcross' + str(Constants.P_CROSS) \
+        + 'replace' + Constants.REPLACE
     if Constants.ACQUISITION != 'ea':
         filename += 'm' + str(Constants.M) \
         + 'h' + str(Constants.H) \
@@ -79,6 +81,7 @@ def save_constants(f):
     f.write('%d,' % Constants.T_SIZE)
     f.write('%f,' % Constants.P_MUT)
     f.write('%f,' % Constants.P_CROSS)
+    f.write('%s,' % Constants.REPLACE)
     f.write('%d,' % Constants.M)
     f.write('%d,' % Constants.H)
     f.write('%d,' % Constants.MAX_ARCHIVE)
@@ -101,9 +104,10 @@ def read_constants(row):
     Constants.T_SIZE = int(row[9])
     Constants.P_MUT = float(row[10])
     Constants.P_CROSS = float(row[11])
-    Constants.M = int(row[12])
-    Constants.H = int(row[13])
-    Constants.MAX_ARCHIVE = int(row[14])
-    Constants.N_MODELS = int(row[15])
-    Constants.NKCS_TOPOLOGY = str(row[16])
-    Constants.MODEL = str(row[17])
+    Constants.REPLACE = str(row[12])
+    Constants.M = int(row[13])
+    Constants.H = int(row[14])
+    Constants.MAX_ARCHIVE = int(row[15])
+    Constants.N_MODELS = int(row[16])
+    Constants.NKCS_TOPOLOGY = str(row[17])
+    Constants.MODEL = str(row[18])
