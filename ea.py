@@ -250,7 +250,7 @@ class EA:
                 candidates = []
                 for _ in range(cons.M):
                     candidates.append(self.create_offspring(parent1, parent2).genome)
-                scores = surrogate.score(model, candidates)
+                scores = model.predict(candidates)
                 child = Ind()
                 child.genome = candidates[np.argmax(scores)]
                 child.fitness = 0

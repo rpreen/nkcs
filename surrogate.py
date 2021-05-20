@@ -45,11 +45,6 @@ def acquisition(mu_sample_opt, mu, std):
         return norm.cdf((mu - mu_sample_opt) / (std + 1E-9))
     return mu # mean
 
-def score(model, X):
-    '''Scores candidates and returns predicted fitnesses.'''
-    mu, std = model.predict(X)
-    return acquisition(model.mu_sample_opt, mu, std)
-
 def model_gp(seed):
     '''Gaussian Process Regressor'''
     kernel = RBF(length_scale=1)
@@ -135,7 +130,7 @@ class Model:
         '''Uses the surrogate model to predict the fitnesses of candidate genomes.'''
         # only one GP model
         if cons.MODEL == 'gp': # only one GP model
-            fit, std = self.models[0].predict(X, return_std=True)
+            mu, std = self.models[0].predict(X, return_std=True)
         # model prediction(s)
         else:
             n_models = len(self.models)
@@ -144,12 +139,12 @@ class Model:
             for i in range(n_models):
                 p[i] = self.models[i].predict(X)
             if n_models > 1:
-                fit = np.mean(p, axis=0)
+                mu = np.mean(p, axis=0)
                 std = np.std(p, axis=0)
             else:
-                fit = p[0]
+                mu = p[0]
                 std = 0
-        return fit, std
+        return acquisition(self.mu_sample_opt, mu, std)
 
     def print_score(self, X, y):
         '''Prints the R squared model scores.'''
