@@ -128,7 +128,6 @@ class Model:
 
     def predict(self, X):
         '''Uses the surrogate model to predict the fitnesses of candidate genomes.'''
-        # only one GP model
         if cons.MODEL == 'gp': # only one GP model
             mu, std = self.models[0].predict(X, return_std=True)
         # model prediction(s)
