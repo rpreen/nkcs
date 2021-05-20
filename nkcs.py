@@ -107,16 +107,13 @@ class NKCS:
 
         def gene_fit(self, inputs, gene):
             '''Returns the fitness of an individual gene within a species.'''
-            # convert binary gene inputs to decimal for indexing
-            allele = 0
-            for i in range(self.n_gene_inputs):
-                allele += inputs[i] * pow(2, i)
+            key = tuple(inputs)
             # find fitness in table
-            if allele in self.ftable[gene]:
-                return self.ftable[gene].get(allele)
+            if key in self.ftable[gene]:
+                return self.ftable[gene].get(key)
             # not found, add new
             fitness = np.random.uniform(low=0, high=1)
-            self.ftable[gene][allele] = fitness
+            self.ftable[gene][key] = fitness
             return fitness
 
         def display(self):

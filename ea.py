@@ -97,79 +97,14 @@ class EA:
                 self.initial_eval(nkcs, team, s, evals, pbest, pavg)
             team[s] = rpartners[s]
 
-    def print_pop(self):
-        '''Prints the current population.'''
-        for s in range(cons.S):
-            print('Species %d' % s)
-            for p in range(cons.P):
-                print(self.pop[s][p].to_string())
-
-    def print_archive(self, s):
-        '''Prints the evaluated genes and fitnesses of a given species.'''
-        for i in range(len(self.archive_genes[s])):
-            for n in range(cons.N):
-                print(str(self.archive_genes[s][i][n]), end='')
-            print(',%.5f' % self.archive_fitness[s][i])
-
-    def get_fittest(self, s):
-        '''Returns the index of the best individual in a given species.'''
-        best = 0
-        fbest = self.pop[s][best].fitness
-        for i in range(1, cons.P):
-            if self.pop[s][i].fitness > fbest:
-                best = i
-                fbest = self.pop[s][i].fitness
-        return best
-
-    def get_best_fit(self, s):
-        '''Returns the fitness of the best individual in a given species.'''
-        return self.pop[s][self.get_fittest(s)].fitness
-
-    def get_avg_fit(self, s):
-        '''Returns the average fitness of a given species.'''
-        avg = 0
-        for i in range(cons.P):
-            avg += self.pop[s][i].fitness
-        avg /= cons.P
-        return avg
-
     def initial_eval(self, nkcs, team, sp, evals, pbest, pavg):
         '''Evaluates the initial populations.'''
-        # calculate team fitness
         team_fit = 0
         for s in range(cons.S):
             team_fit += nkcs.calc_fit(s, team)
-        # assign fitness to the individual in this species
         team[sp].fitness = team_fit
-        # archive
-        self.archive_genes[sp].append(team[sp].genome) # unscaled
-        self.archive_fitness[sp].append(team[sp].fitness)
-        if len(self.archive_genes[sp]) > cons.MAX_ARCHIVE:
-            self.archive_genes[sp].pop(0)
-            self.archive_fitness[sp].pop(0)
-        self.evals += 1 # total team evals performed
-        if self.evals % (cons.P * cons.S) == 0:
-            self.update_perf(evals, pbest, pavg)
-
-    def eval_team(self, nkcs, team, evals, pbest, pavg):
-        '''Evaluates a candidate team.'''
-        # calculate team fitness
-        team_fit = 0
-        for s in range(cons.S):
-            team_fit += nkcs.calc_fit(s, team)
-        # assign fitness to each individual if best seen
-        for s in range(cons.S):
-            if team[s].fitness < team_fit:
-                team[s].fitness = team_fit
-                # archive
-                self.archive_genes[s].append(team[s].genome)
-                self.archive_fitness[s].append(team[s].fitness)
-                if len(self.archive_genes[s]) > cons.MAX_ARCHIVE:
-                    self.archive_genes[s].pop(0)
-                    self.archive_fitness[s].pop(0)
-        self.evals += 1 # total team evals performed
-        if self.evals % (cons.P * cons.S) == 0:
-            self.update_perf(evals, pbest, pavg)
+        self.update_archive(sp, team[sp].genome, team[sp].fitness)
+        self.update_perf(evals, pbest, pavg)
 
     def eval(self, nkcs, sp, child, evals, pbest, pavg):
         '''Selects the best partners for a child and evaluates the team.'''
@@ -180,6 +115,60 @@ class EA:
             else:
                 team.append(child)
         self.eval_team(nkcs, team, evals, pbest, pavg)
+
+    def eval_team(self, nkcs, team, evals, pbest, pavg):
+        '''Evaluates a candidate team.'''
+        team_fit = 0
+        for s in range(cons.S):
+            team_fit += nkcs.calc_fit(s, team)
+        # assign fitness to each individual if it's the best seen
+        for s in range(cons.S):
+            if team[s].fitness < team_fit:
+                team[s].fitness = team_fit
+                self.update_archive(s, team[s].genome, team[s].fitness)
+        self.update_perf(evals, pbest, pavg)
+
+    def update_archive(self, s, genome, fitness):
+        '''Adds an evaluated individual to the species archive.'''
+        self.archive_genes[s].append(genome) # unscaled
+        self.archive_fitness[s].append(fitness)
+        if len(self.archive_genes[s]) > cons.MAX_ARCHIVE:
+            self.archive_genes[s].pop(0)
+            self.archive_fitness[s].pop(0)
+
+    def update_perf(self, evals, perf_best, perf_avg):
+        '''Updates current performance tracking.'''
+        self.evals += 1 # total team evals performed
+        if self.evals % (cons.P * cons.S) == 0:
+            best = self.get_best_fit(0)
+            avg = self.get_avg_fit(0)
+            for s in range(1, cons.S):
+                gb = self.get_best_fit(s)
+                if gb > best:
+                    best = gb
+                avg += self.get_avg_fit(s)
+            gen = int((self.evals / (cons.P * cons.S)) - 1)
+            evals[gen] = self.evals
+            perf_best[gen] = best
+            perf_avg[gen] = avg / cons.S
+
+    def create_offspring(self, p1, p2):
+        '''Creates and returns a new offspring.'''
+        child = deepcopy(p1)
+        child.fitness = 0
+        child.uniform_crossover(p2)
+        child.mutate()
+        return child
+
+    def add_offspring(self, s, child):
+        '''Adds an offspring to the species population.'''
+        if cons.REPLACE == 'tournament':
+            replace = self.neg_tournament(s)
+            self.pop[s][replace] = deepcopy(child)
+        else:
+            replace = self.get_worst(s)
+            if self.pop[s][replace].fitness < child.fitness:
+                self.pop[s][replace] = deepcopy(child)
 
     def tournament(self, s):
         '''Returns a parent selected by tournament.'''
@@ -205,7 +194,7 @@ class EA:
                 fworst = fcompetitor
         return worst
 
-    def worst(self, s):
+    def get_worst(self, s):
         '''Returns the index of the least fit individual in a species.'''
         worst = 0
         for i in range(1, cons.P):
@@ -213,37 +202,41 @@ class EA:
                 worst = i
         return worst
 
-    def add_offspring(self, s, child):
-        '''Adds an offspring to the species population.'''
-        if cons.REPLACE == 'tournament':
-            replace = self.neg_tournament(s)
-            self.pop[s][replace] = deepcopy(child)
-        else:
-            replace = self.worst(s)
-            if self.pop[s][replace].fitness < child.fitness:
-                self.pop[s][replace] = deepcopy(child)
+    def get_fittest(self, s):
+        '''Returns the index of the best individual in a given species.'''
+        best = 0
+        fbest = self.pop[s][best].fitness
+        for i in range(1, cons.P):
+            if self.pop[s][i].fitness > fbest:
+                best = i
+                fbest = self.pop[s][i].fitness
+        return best
 
-    def create_offspring(self, p1, p2):
-        '''Creates and returns a new offspring.'''
-        child = deepcopy(p1)
-        child.fitness = 0
-        child.uniform_crossover(p2)
-        child.mutate()
-        return child
+    def get_best_fit(self, s):
+        '''Returns the fitness of the best individual in a given species.'''
+        return self.pop[s][self.get_fittest(s)].fitness
 
-    def update_perf(self, evals, perf_best, perf_avg):
-        '''Updates current performance tracking.'''
-        best = self.get_best_fit(0)
-        avg = self.get_avg_fit(0)
-        for s in range(1, cons.S):
-            gb = self.get_best_fit(s)
-            if gb > best:
-                best = gb
-            avg += self.get_avg_fit(s)
-        gen = int((self.evals / (cons.P * cons.S)) - 1)
-        evals[gen] = self.evals
-        perf_best[gen] = best
-        perf_avg[gen] = avg / cons.S
+    def get_avg_fit(self, s):
+        '''Returns the average fitness of a given species.'''
+        avg = 0
+        for i in range(cons.P):
+            avg += self.pop[s][i].fitness
+        avg /= cons.P
+        return avg
+
+    def print_archive(self, s):
+        '''Prints the evaluated genes and fitnesses of a given species.'''
+        for i in range(len(self.archive_genes[s])):
+            for n in range(cons.N):
+                print(str(self.archive_genes[s][i][n]), end='')
+            print(',%.5f' % self.archive_fitness[s][i])
+
+    def print_pop(self):
+        '''Prints the current population.'''
+        for s in range(cons.S):
+            print('Species %d' % s)
+            for p in range(cons.P):
+                print(self.pop[s][p].to_string())
 
     def run_ea(self, nkcs, evals, pbest, pavg):
         '''Executes a standard EA - partnering with the best candidates.'''
