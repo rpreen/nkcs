@@ -45,9 +45,9 @@ def acquisition(mu_sample_opt, mu, std):
         return norm.cdf((mu - mu_sample_opt) / (std + 1E-9))
     return mu # mean
 
-def score(model, candidates):
+def score(model, X):
     '''Scores candidates and returns predicted fitnesses.'''
-    mu, std = model.predict(candidates)
+    mu, std = model.predict(X)
     return acquisition(model.mu_sample_opt, mu, std)
 
 def model_gp(seed):
@@ -131,18 +131,18 @@ class Model:
             self.models = Parallel(n_jobs=cons.NUM_THREADS)(delayed
                 (train_model)(X_train, y_train) for _ in range(cons.N_MODELS))
 
-    def predict(self, candidates):
+    def predict(self, X):
         '''Uses the surrogate model to predict the fitnesses of candidate genomes.'''
         # only one GP model
         if cons.MODEL == 'gp': # only one GP model
-            fit, std = self.models[0].predict(candidates, return_std=True)
+            fit, std = self.models[0].predict(X, return_std=True)
         # model prediction(s)
         else:
             n_models = len(self.models)
-            n_samples = len(candidates)
+            n_samples = len(X)
             p = np.zeros((n_models, n_samples))
             for i in range(n_models):
-                p[i] = self.models[i].predict(candidates)
+                p[i] = self.models[i].predict(X)
             if n_models > 1:
                 fit = np.mean(p, axis=0)
                 std = np.std(p, axis=0)
