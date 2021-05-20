@@ -143,9 +143,9 @@ class EA:
             best = self.get_best_fit(0)
             avg = self.get_avg_fit(0)
             for s in range(1, cons.S):
-                gb = self.get_best_fit(s)
-                if gb > best:
-                    best = gb
+                b = self.get_best_fit(s)
+                if b > best:
+                    best = b
                 avg += self.get_avg_fit(s)
             gen = int((self.evals / (cons.P * cons.S)) - 1)
             evals[gen] = self.evals
