@@ -107,10 +107,6 @@ def train_model(X, y, seed=None):
         sys.exit()
     return model.fit(X, y)
 
-def test_model(model, X):
-    '''Returns the predictions using a surrogate model.'''
-    return model.predict(X.reshape(1,-1))[0]
-
 class Model:
     '''A surrogate model for the NKCS EA.'''
 
