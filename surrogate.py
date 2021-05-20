@@ -45,10 +45,10 @@ def acquisition(mu_sample_opt, mu, std):
         return norm.cdf((mu - mu_sample_opt) / (std + 1E-9))
     return mu # mean
 
-def score(model, candidates, mu_sample_opt):
+def score(model, candidates):
     '''Scores candidates and returns predicted fitnesses.'''
     mu, std = model.predict(candidates)
-    return acquisition(mu_sample_opt, mu, std)
+    return acquisition(model.mu_sample_opt, mu, std)
 
 def model_gp(seed):
     '''Gaussian Process Regressor'''
@@ -114,6 +114,7 @@ class Model:
         '''Initialises a surrogate model.'''
         self.output_scaler = StandardScaler()
         self.models = []
+        self.mu_sample_opt = 0
 
     def train(self, X, y):
         '''Trains a surrogate model using the evaluated genomes and fitnesses.'''
@@ -121,6 +122,7 @@ class Model:
         y = np.asarray(y).reshape(-1, 1)
         self.output_scaler.fit(y)
         y_train = self.output_scaler.transform(y).ravel()
+        self.mu_sample_opt = np.max(y_train)
         X_train = X # unscaled binary inputs
         # fit models
         if cons.MODEL == 'gp':

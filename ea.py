@@ -244,14 +244,13 @@ class EA:
             for s in range(cons.S):
                 model = surrogate.Model()
                 model.train(self.archive_genes[s], self.archive_fitness[s])
-                mu_sample_opt = np.max(self.archive_fitness[s])
                 # best of M offspring from 2 parents
                 parent1 = self.pop[s][self.tournament(s)]
                 parent2 = self.pop[s][self.tournament(s)]
                 candidates = []
                 for _ in range(cons.M):
                     candidates.append(self.create_offspring(parent1, parent2).genome)
-                scores = surrogate.score(model, candidates, mu_sample_opt)
+                scores = surrogate.score(model, candidates)
                 child = Ind()
                 child.genome = candidates[np.argmax(scores)]
                 child.fitness = 0
