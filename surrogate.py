@@ -83,7 +83,7 @@ def model_tree(seed):
     model = DecisionTreeRegressor(random_state=seed)
     return model
 
-def train_model(X, y, seed=None):
+def fit_model(X, y, seed=None):
     '''Trains a surrogate model.'''
     if cons.MODEL == 'gp':
         model = model_gp(seed)
@@ -111,7 +111,7 @@ class Model:
         self.models = []
         self.mu_sample_opt = 0
 
-    def train(self, X, y):
+    def fit(self, X, y):
         '''Trains a surrogate model using the evaluated genomes and fitnesses.'''
         # normalise training data (zero mean and unit variance)
         y = np.asarray(y).reshape(-1, 1)
@@ -121,10 +121,10 @@ class Model:
         X_train = X # unscaled binary inputs
         # fit models
         if cons.MODEL == 'gp':
-            self.models.append(train_model(X_train, y_train))
+            self.models.append(fit_model(X_train, y_train))
         else:
             self.models = Parallel(n_jobs=cons.NUM_THREADS)(delayed
-                (train_model)(X_train, y_train) for _ in range(cons.N_MODELS))
+                (fit_model)(X_train, y_train) for _ in range(cons.N_MODELS))
 
     def predict(self, X):
         '''Uses the surrogate model to predict the fitnesses of candidate genomes.'''

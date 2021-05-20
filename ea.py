@@ -243,7 +243,7 @@ class EA:
         while self.evals < cons.MAX_EVALS:
             for s in range(cons.S):
                 model = surrogate.Model()
-                model.train(self.archive_genes[s], self.archive_fitness[s])
+                model.fit(self.archive_genes[s], self.archive_fitness[s])
                 # best of M offspring from 2 parents
                 parent1 = self.pop[s][self.tournament(s)]
                 parent2 = self.pop[s][self.tournament(s)]
