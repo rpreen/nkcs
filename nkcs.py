@@ -45,7 +45,7 @@ class NKCS:
         cnt = 0
         # internal connections
         for _ in range(cons.K):
-            node = species.con[offset + cnt]
+            node = species.map[offset + cnt]
             inputs[cnt] = team[sp].genome[node]
             cnt += 1
         # external connections
@@ -53,20 +53,20 @@ class NKCS:
             if sp != 0:
                 left = cons.S - 1 if sp - 1 < 0 else sp - 1
                 for _ in range(cons.C):
-                    node = species.con[offset + cnt]
+                    node = species.map[offset + cnt]
                     inputs[cnt] = team[left].genome[node]
                     cnt += 1
             if sp != cons.S - 1:
                 right = (sp + 1) % cons.S
                 for _ in range(cons.C):
-                    node = species.con[offset + cnt]
+                    node = species.map[offset + cnt]
                     inputs[cnt] = team[right].genome[node]
                     cnt += 1
         elif cons.NKCS_TOPOLOGY == 'standard':
             for j in range(cons.S):
                 if j != sp:
                     for _ in range(cons.C):
-                        node = species.con[offset + cnt]
+                        node = species.map[offset + cnt]
                         inputs[cnt] = team[j].genome[node]
                         cnt += 1
         else:
@@ -101,8 +101,8 @@ class NKCS:
                     print('unsupported NKCS topology')
                     sys.exit()
             self.n_gene_inputs = cons.K + (X * cons.C) + 1 #: n inputs to each gene
-            self.clen = cons.N * (self.n_gene_inputs - 1) #: connectivity map length
-            self.con = np.random.randint(0, cons.N, self.clen) #: connectivity
+            map_len = cons.N * (self.n_gene_inputs - 1) #: connectivity map length
+            self.map = np.random.randint(0, cons.N, map_len) #: connectivity
             self.ftable = [{} for i in range(cons.N)] #: each gene's hash table
 
         def gene_fit(self, inputs, gene):
@@ -118,7 +118,7 @@ class NKCS:
 
         def display(self):
             '''Prints an NKCS species.'''
-            print('con: ' + str(self.con))
+            print('con: ' + str(self.map))
             print('fitness table:')
             for i in range(len(self.ftable)):
                 print('Gene (%d)' % i)
