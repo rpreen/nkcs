@@ -94,6 +94,21 @@ def plot(filenames, plotname):
     path = os.path.normpath('res/'+str(plotname)+'.pdf')
     fig.savefig(path, bbox_inches='tight')
 
+def stat(filename1, filename2, generation):
+    '''Compares the best individuals at a specified generation.'''
+    evals1, perf_best1, perf_avg1 = read_data(filename1)
+    evals2, perf_best2, perf_avg2 = read_data(filename2)
+    a = perf_best1[:, generation]
+    b = perf_best2[:, generation]
+    print('A: MEAN=%.5f, SD=%.5f, SE=%.5f, N=%d, MIN=%.5f, MEDIAN=%.5f' % (
+        np.mean(a, axis=0), np.std(a, axis=0), stats.sem(a, axis=0), len(a),
+        np.min(a, axis=0), np.median(a, axis=0)))
+    print('B: MEAN=%.5f, SD=%.5f, SE=%.5f, N=%d, MIN=%.5f, MEDIAN=%.5f' % (
+        np.mean(b, axis=0), np.std(b, axis=0), stats.sem(b, axis=0), len(b),
+        np.min(b, axis=0), np.median(b, axis=0)))
+    (stat, pvalue) = stats.ranksums(a, b)
+    print('Wilcoxon rank-sums: A vs. B: stat = %.5f, p <= %.5f\n' % (stat, pvalue))
+
 # plots all experiments if this script is executed
 if __name__ == '__main__':
     if len(FILE_LIST) > 0:
