@@ -101,8 +101,8 @@ class NKCS:
                     print('unsupported NKCS topology')
                     sys.exit()
             self.n_gene_inputs = cons.K + (X * cons.C) + 1 #: n inputs to each gene
-            map_len = cons.N * (self.n_gene_inputs - 1) #: connectivity map length
-            self.map = np.random.randint(0, cons.N, map_len) #: connectivity
+            map_length = cons.N * (self.n_gene_inputs - 1) #: connectivity length
+            self.map = np.random.randint(0, cons.N, map_length) #: connectivity
             self.ftable = [{} for i in range(cons.N)] #: each gene's hash table
 
         def gene_fit(self, inputs, gene):
