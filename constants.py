@@ -58,7 +58,8 @@ def get_filename():
         + 'tsize' + str(Constants.T_SIZE) \
         + 'pmut' + str(Constants.P_MUT) \
         + 'pcross' + str(Constants.P_CROSS) \
-        + 'replace' + Constants.REPLACE
+        + 'replace' + Constants.REPLACE \
+        + 'evals' + str(Constants.MAX_EVALS)
     if Constants.ACQUISITION != 'ea':
         filename += 'm' + str(Constants.M) \
         + 'h' + str(Constants.H) \
