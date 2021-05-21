@@ -45,14 +45,14 @@ if USE_TEX:
 def get_title():
     '''Returns the title.'''
     if USE_TEX:
-        return '$N$=' + str(cons.N) \
-            + ' $K$=' + str(cons.K) \
-            + ' $C$=' + str(cons.C) \
-            + ' $S$=' + str(cons.S)
-    return 'N=' + str(cons.N) \
-        + ' K=' + str(cons.K) \
-        + ' C=' + str(cons.C) \
-        + ' S=' + str(cons.S)
+        title = '$N$=' + str(cons.N) + ' $K$=' + str(cons.K)
+        if cons.S > 1:
+            title += ' $C$=' + str(cons.C) + ' $S$=' + str(cons.S)
+    else:
+        title = 'N=' + str(cons.N) + ' K=' + str(cons.K)
+        if cons.S > 1:
+            title += ' C=' + str(cons.C) + ' S=' + str(cons.S)
+    return title
 
 def get_label(l):
     '''Returns the plot label.'''
@@ -106,8 +106,8 @@ def stat(filename1, filename2, generation):
     print('B: MEAN=%.5f, SD=%.5f, SE=%.5f, N=%d, MIN=%.5f, MEDIAN=%.5f' % (
         np.mean(b, axis=0), np.std(b, axis=0), stats.sem(b, axis=0), len(b),
         np.min(b, axis=0), np.median(b, axis=0)))
-    (stat, pvalue) = stats.ranksums(a, b)
-    print('Wilcoxon rank-sums: A vs. B: stat = %.5f, p <= %.5f\n' % (stat, pvalue))
+    (s, p) = stats.ranksums(a, b)
+    print('Wilcoxon rank-sums: A vs. B: stat = %.5f, p <= %.5f\n' % (s, p))
 
 # plots all experiments if this script is executed
 if __name__ == '__main__':
