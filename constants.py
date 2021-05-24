@@ -42,6 +42,8 @@ class Constants:
     MAX_EVALS = P * S * G #: number of evaluations per experiment
     NKCS_TOPOLOGY = 'standard' #: topology = {'line', 'standard'}
     NUM_THREADS = 8 #: number of CPU threads for model building
+    EXPERIMENT_SAVE = False #: whether to save landscapes and initial populations
+    EXPERIMENT_LOAD = False #: whether to load landscapes and initial populations
 
 def get_filename():
     '''Returns a file name based on the parameters.'''

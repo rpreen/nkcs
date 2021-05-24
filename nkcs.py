@@ -37,6 +37,13 @@ class NKCS:
             total += self.species[sp].gene_fit(inputs, i)
         return total / cons.N
 
+    def calc_team_fit(self, team):
+        '''Returns the total team fitness.'''
+        total = 0
+        for s in range(cons.S):
+            total += self.calc_fit(s, team)
+        return total
+
     def get_gene_inputs(self, sp, team, gene_idx):
         '''Returns the inputs to a gene (including the internal state).'''
         species = self.species[sp] # species containing the gene

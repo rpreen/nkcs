@@ -73,7 +73,7 @@ class Ind:
 class EA:
     '''NKCS evolutionary algorithm.'''
 
-    def __init__(self, nkcs, evals, pbest, pavg):
+    def __init__(self, nkcs):
         '''Initialises the evolutionary algorithm.'''
         self.evals = 0 #: number of evaluations performed
         self.archive_genes = [[] for s in range(cons.S)] #: evaluated genes
@@ -94,39 +94,30 @@ class EA:
         for s in range(cons.S):
             for p in range(cons.P):
                 team[s] = self.pop[s][p]
-                self.initial_eval(nkcs, team, s, evals, pbest, pavg)
+                team[s].fitness = nkcs.calc_team_fit(team)
+                self.update_archive(s, team[s].genome, team[s].fitness)
+                self.evals += 1
             team[s] = rpartners[s]
 
-    def initial_eval(self, nkcs, team, sp, evals, pbest, pavg):
-        '''Evaluates the initial populations.'''
-        team_fit = 0
+    def eval_team(self, nkcs, team):
+        '''Evaluates a candidate team.
+        Assigns fitness to each individual if it's the best seen.'''
+        team_fit = nkcs.calc_team_fit(team)
         for s in range(cons.S):
-            team_fit += nkcs.calc_fit(s, team)
-        team[sp].fitness = team_fit
-        self.update_archive(sp, team[sp].genome, team[sp].fitness)
-        self.update_perf(evals, pbest, pavg)
+            if team[s].fitness < team_fit:
+                team[s].fitness = team_fit
+                self.update_archive(s, team[s].genome, team[s].fitness)
+        self.evals += 1 # total team evals performed
 
-    def eval(self, nkcs, sp, child, evals, pbest, pavg):
-        '''Selects the best partners for a child and evaluates the team.'''
+    def get_team_best(self, sp, child):
+        '''Returns a team assembled with the best partners for a child.'''
         team = []
         for s in range(cons.S):
             if s != sp:
                 team.append(self.pop[s][self.get_best(s)])
             else:
                 team.append(child)
-        self.eval_team(nkcs, team, evals, pbest, pavg)
-
-    def eval_team(self, nkcs, team, evals, pbest, pavg):
-        '''Evaluates a candidate team.'''
-        team_fit = 0
-        for s in range(cons.S):
-            team_fit += nkcs.calc_fit(s, team)
-        # assign fitness to each individual if it's the best seen
-        for s in range(cons.S):
-            if team[s].fitness < team_fit:
-                team[s].fitness = team_fit
-                self.update_archive(s, team[s].genome, team[s].fitness)
-        self.update_perf(evals, pbest, pavg)
+        return team
 
     def update_archive(self, s, genome, fitness):
         '''Adds an evaluated individual to the species archive.'''
@@ -138,7 +129,6 @@ class EA:
 
     def update_perf(self, evals, perf_best, perf_avg):
         '''Updates current performance tracking.'''
-        self.evals += 1 # total team evals performed
         if self.evals % (cons.P * cons.S) == 0:
             best = self.get_best_fit(0)
             avg = self.get_avg_fit(0)
@@ -242,8 +232,10 @@ class EA:
                 parent1 = self.pop[s][self.tournament(s)]
                 parent2 = self.pop[s][self.tournament(s)]
                 child = self.create_offspring(parent1, parent2)
-                self.eval(nkcs, s, child, evals, pbest, pavg)
+                team = self.get_team_best(s, child)
+                self.eval_team(nkcs, team)
                 self.add_offspring(s, child)
+                self.update_perf(evals, pbest, pavg)
 
     def run_sea(self, nkcs, evals, pbest, pavg):
         '''Executes a surrogate-assisted EA.'''
@@ -261,5 +253,7 @@ class EA:
                 child = Ind()
                 child.genome = candidates[np.argmax(scores)]
                 # evaluate offspring
-                self.eval(nkcs, s, child, evals, pbest, pavg)
+                team = self.get_team_best(s, child)
+                self.eval_team(nkcs, team)
                 self.add_offspring(s, child)
+                self.update_perf(evals, pbest, pavg)
