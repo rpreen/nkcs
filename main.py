@@ -19,7 +19,9 @@
 '''Main script for starting NKCS (co)evolutionary experiments.'''
 
 import os
+import sys
 import warnings
+import dill
 from tqdm import tqdm
 from constants import Constants as cons # parameters are in constants.py
 from constants import get_filename
@@ -44,23 +46,52 @@ evals = np.zeros((N_RES, cons.G))
 perf_best = np.zeros((N_RES, cons.G))
 perf_avg = np.zeros((N_RES, cons.G))
 
-bar = tqdm(total=N_RES) #: progress bar
 r = 0 #: run counter
+nkcs = [] #: NKCS landscapes
+ea = [] #: EA populations
+
+if cons.EXPERIMENT_LOAD: # reuse fitness landscapes and initial populations
+    with open('experiment.pkl', 'rb') as f:
+        ea = dill.load(f)
+        nkcs = dill.load(f)
+    if len(nkcs) != cons.F or len(ea) != N_RES:
+        print('loaded experiment does not match constants')
+        sys.exit()
+    for _ in range(cons.F):
+        for _ in range(cons.E):
+            ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
+            r += 1
+else: # create new fitness landscapes and initial populations
+    for f in range(cons.F):
+        nkcs.append(NKCS())
+        for _ in range(cons.E):
+            ea.append(EA(nkcs[f]))
+            ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
+            r += 1
+    if cons.EXPERIMENT_SAVE:
+        with open('experiment.pkl', 'wb') as f:
+            dill.dump(ea, f)
+
+# run the experiments
+r = 0
+bar = tqdm(total=N_RES) #: progress bar
 for f in range(cons.F): # F NKCS functions
-    nkcs = NKCS()
     for e in range(cons.E): # E experiments
-        ea = EA(nkcs, evals[r], perf_best[r], perf_avg[r])
         if cons.ACQUISITION == 'ea':
-            ea.run_ea(nkcs, evals[r], perf_best[r], perf_avg[r])
+            ea[r].run_ea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
         else:
-            ea.run_sea(nkcs, evals[r], perf_best[r], perf_avg[r])
+            ea[r].run_sea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
         status = ('nkcs (%d) experiment (%d) complete: (%.5f)' %
-            (f, e, ea.get_best_fit(0)))
+            (f, e, ea[r].get_best_fit(0)))
         r += 1
         bar.set_description(status)
         bar.refresh()
         bar.update(1)
 bar.close()
+
+if cons.EXPERIMENT_SAVE:
+    with open('experiment.pkl', 'a+b') as f:
+        dill.dump(nkcs, f)
 
 # write performance to a file and plot results
 FILENAME = get_filename()
