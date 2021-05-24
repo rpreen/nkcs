@@ -61,8 +61,6 @@ if cons.EXPERIMENT_LOAD: # reuse fitness landscapes and initial populations
         for _ in range(cons.E):
             ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
             r += 1
-    print(perf_best[0])
-    sys.exit()
 else: # create new fitness landscapes and initial populations
     for f in range(cons.F):
         nkcs.append(NKCS())
