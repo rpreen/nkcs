@@ -29,14 +29,20 @@ class NKCS:
         '''Initialises a randomly generated NKCS model.'''
         self.species = [self.Species(i) for i in range(cons.S)]
 
+    def calc_fit(self, sp, team):
+        '''Returns the fitness of an individual partnered with a given team.'''
+        total = 0
+        for i in range(cons.N):
+            inputs = self.get_gene_inputs(sp, team, i)
+            total += self.species[sp].gene_fit(inputs, i)
+        return total / cons.N
+
     def calc_team_fit(self, team):
         '''Returns the total team fitness.'''
         total = 0
         for s in range(cons.S):
-            for n in range(cons.N):
-                inputs = self.get_gene_inputs(s, team, n)
-                total += self.species[s].gene_fit(inputs, n)
-        return total / (cons.S * cons.N)
+            total += self.calc_fit(s, team)
+        return total
 
     def get_gene_inputs(self, sp, team, gene_idx):
         '''Returns the inputs to a gene (including the internal state).'''
