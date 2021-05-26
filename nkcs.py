@@ -33,10 +33,11 @@ class NKCS:
     def calc_fit(self, sp, team):
         '''Returns the fitness of an individual partnered with a given team.'''
         total = 0
-        for i in range(cons.N):
+        N = len(team[sp].genome)
+        for i in range(N):
             inputs = self.get_gene_inputs(sp, team, i)
             total += self.species[sp].gene_fit(inputs, i)
-        return total / cons.N
+        return total / N
 
     def calc_team_fit(self, team):
         '''Returns the total team fitness.'''
