@@ -125,7 +125,7 @@ class NKCS:
                 sp_map = np.resize(self.map[i], map_length)
                 # add new gene's connections
                 sp_map[prev_map_length :] = \
-                    np.random.randint(0, cons.N + i, self.n_gene_inputs -1)
+                    np.random.randint(0, cons.N + i, self.n_gene_inputs - 1)
                 # wire the first connection of a random gene to the new gene
                 sp_map[random.randint(0, cons.N + i)] = cons.N + i
                 self.map.append(sp_map)
