@@ -22,11 +22,11 @@ class Constants:
     '''Global constants.'''
     F = 10 #: number of different NKCS experiments to run
     E = 10 #: number of experiments per NKCS to run
-    G = 10 #: number of generations to run genetic algorithm
+    G = 25 #: number of generations to run genetic algorithm
     N = 20 #: number of genes (nodes/characteristics)
     K = 2 #: number of connections to other (internal) genes
     C = 2 #: number of external genes affecting each gene
-    S = 2 #: number of species
+    S = 1 #: number of species
     P = 20 #: number of individuals in each species population
     T_SIZE = 3 #: size of selection and replacement tournament
     P_MUT = 1 / N #: per gene probability of mutation
@@ -42,6 +42,7 @@ class Constants:
     MAX_EVALS = P * S * G #: number of evaluations per experiment
     NKCS_TOPOLOGY = 'standard' #: topology = {'line', 'standard'}
     NUM_THREADS = 8 #: number of CPU threads for model building
+    MAX_GROW = 20 #: maximum number of new genes an individual can grow (from N)
     EXPERIMENT_SAVE = False #: whether to save landscapes and initial populations
     EXPERIMENT_LOAD = False #: whether to load landscapes and initial populations
 

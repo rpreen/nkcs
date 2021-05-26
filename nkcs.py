@@ -19,6 +19,7 @@
 '''An implementation of the NKCS model for exploring aspects of coevolution.'''
 
 import sys
+import random
 import numpy as np
 from constants import Constants as cons
 
@@ -49,31 +50,35 @@ class NKCS:
         species = self.species[sp] # species containing the gene
         inputs = [0 for i in range(species.n_gene_inputs)] # inputs to the gene
         offset = gene_idx * (species.n_gene_inputs - 1) # map offset
+        map_idx = len(team[sp].genome) - cons.N # which map depends on num genes
         cnt = 0
         # internal connections
         for _ in range(cons.K):
-            node = species.map[offset + cnt]
+            node = species.map[map_idx][offset + cnt]
             inputs[cnt] = team[sp].genome[node]
             cnt += 1
         # external connections
         if cons.NKCS_TOPOLOGY == 'line':
             if sp != 0:
                 left = cons.S - 1 if sp - 1 < 0 else sp - 1
+                map_idx = len(team[left].genome) - cons.N
                 for _ in range(cons.C):
-                    node = species.map[offset + cnt]
+                    node = species.map[map_idx][offset + cnt]
                     inputs[cnt] = team[left].genome[node]
                     cnt += 1
             if sp != cons.S - 1:
                 right = (sp + 1) % cons.S
+                map_idx = len(team[right].genome) - cons.N
                 for _ in range(cons.C):
-                    node = species.map[offset + cnt]
+                    node = species.map[map_idx][offset + cnt]
                     inputs[cnt] = team[right].genome[node]
                     cnt += 1
         elif cons.NKCS_TOPOLOGY == 'standard':
             for j in range(cons.S):
                 if j != sp:
+                    map_idx = len(team[j].genome) - cons.N
                     for _ in range(cons.C):
-                        node = species.map[offset + cnt]
+                        node = species.map[map_idx][offset + cnt]
                         inputs[cnt] = team[j].genome[node]
                         cnt += 1
         else:
@@ -109,8 +114,20 @@ class NKCS:
                     sys.exit()
             self.n_gene_inputs = cons.K + (X * cons.C) + 1 #: n inputs to each gene
             map_length = cons.N * (self.n_gene_inputs - 1) #: connectivity length
-            self.map = np.random.randint(0, cons.N, map_length) #: connectivity
-            self.ftable = [{} for i in range(cons.N)] #: each gene's hash table
+            self.map = [np.random.randint(0, cons.N, map_length)] #: connectivity
+            ftable_length = cons.N + cons.MAX_GROW
+            self.ftable = [{} for i in range(ftable_length)] #: each gene's hash table
+            # build species connectivity maps for varying number of genes
+            for i in range(cons.MAX_GROW):
+                prev_map_length = map_length
+                map_length += self.n_gene_inputs - 1
+                sp_map = np.resize(self.map[i], map_length)
+                # add new gene's connections
+                sp_map[prev_map_length :] = \
+                    np.random.randint(0, cons.N + i, self.n_gene_inputs -1)
+                # wire the first connection of a random gene to the new gene
+                sp_map[random.randint(0, cons.N + i)] = cons.N + i
+                self.map.append(sp_map)
 
         def gene_fit(self, inputs, gene):
             '''Returns the fitness of an individual gene within a species.'''
@@ -125,7 +142,7 @@ class NKCS:
 
         def display(self):
             '''Prints an NKCS species.'''
-            print('con: ' + str(self.map))
+            print('con: ' + str(self.map[0]))
             print('fitness table:')
             for i in range(len(self.ftable)):
                 print('Gene (%d)' % i)

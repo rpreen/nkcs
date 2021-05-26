@@ -35,8 +35,15 @@ class Ind:
         '''Returns a string representation of an individual.'''
         return str(self.genome) + ' => ' + str(self.fitness)
 
+    def expand(self):
+        '''Adds a gene to an individual.'''
+        if len(self.genome) < cons.N + cons.MAX_GROW:
+            if np.random.uniform(low=0, high=1) < cons.P_MUT:
+                self.genome.append(np.random.randint(0, 2))
+
     def mutate(self):
         '''Mutates an individual.'''
+        self.expand()
         for i in range(cons.N):
             if np.random.uniform(low=0, high=1) < cons.P_MUT:
                 if self.genome[i] == 0:
@@ -210,6 +217,10 @@ class EA:
         for i in range(cons.P):
             total += self.pop[s][i].fitness
         return total / cons.P
+
+    def get_best_length(self, s):
+        '''Returns the length of the best individual in a given species.'''
+        return len(self.pop[s][self.get_best(s)].genome)
 
     def print_archive(self, s):
         '''Prints the evaluated genes and fitnesses of a given species.'''
