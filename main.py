@@ -82,7 +82,7 @@ for f in range(cons.F): # F NKCS functions
         else:
             ea[r].run_sea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
         status = ('nkcs (%d) experiment (%d) complete: (%.5f, %d)' %
-            (f, e, ea[r].get_best_fit(0), ea[r].get_best_length(0))))
+            (f, e, ea[r].get_best_fit(0), ea[r].get_best_length(0)))
         r += 1
         bar.set_description(status)
         bar.refresh()
