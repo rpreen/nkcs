@@ -45,6 +45,7 @@ N_RES = cons.F * cons.E
 evals = np.zeros((N_RES, cons.G))
 perf_best = np.zeros((N_RES, cons.G))
 perf_avg = np.zeros((N_RES, cons.G))
+len_best = np.zeros((N_RES, cons.G))
 
 r = 0 #: run counter
 nkcs = [] #: NKCS landscapes
@@ -59,14 +60,14 @@ if cons.EXPERIMENT_LOAD: # reuse fitness landscapes and initial populations
         sys.exit()
     for _ in range(cons.F):
         for _ in range(cons.E):
-            ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
+            ea[r].update_perf(evals[r], perf_best[r], perf_avg[r], len_best[r])
             r += 1
 else: # create new fitness landscapes and initial populations
     for f in range(cons.F):
         nkcs.append(NKCS())
         for _ in range(cons.E):
             ea.append(EA(nkcs[f]))
-            ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
+            ea[r].update_perf(evals[r], perf_best[r], perf_avg[r], len_best[r])
             r += 1
     if cons.EXPERIMENT_SAVE:
         with open('experiment.pkl', 'wb') as f:
@@ -78,9 +79,9 @@ bar = tqdm(total=N_RES) #: progress bar
 for f in range(cons.F): # F NKCS functions
     for e in range(cons.E): # E experiments
         if cons.ACQUISITION == 'ea':
-            ea[r].run_ea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
+            ea[r].run_ea(nkcs[f], evals[r], perf_best[r], perf_avg[r], len_best[r])
         else:
-            ea[r].run_sea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
+            ea[r].run_sea(nkcs[f], evals[r], perf_best[r], perf_avg[r], len_best[r])
         status = ('nkcs (%d) experiment (%d) complete: (%.5f, %d)' %
             (f, e, ea[r].get_best_fit(0), ea[r].get_best_length(0)))
         r += 1
@@ -95,6 +96,6 @@ if cons.EXPERIMENT_SAVE:
 
 # write performance to a file and plot results
 FILENAME = get_filename()
-save_data(FILENAME, evals, perf_best, perf_avg)
+save_data(FILENAME, evals, perf_best, perf_avg, len_best)
 if cons.PLOT:
     plot([FILENAME], FILENAME)

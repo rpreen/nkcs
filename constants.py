@@ -22,7 +22,7 @@ class Constants:
     '''Global constants.'''
     F = 10 #: number of different NKCS experiments to run
     E = 10 #: number of experiments per NKCS to run
-    G = 25 #: number of generations to run genetic algorithm
+    G = 500 #: number of generations to run genetic algorithm
     N = 20 #: number of genes (nodes/characteristics)
     K = 2 #: number of connections to other (internal) genes
     C = 2 #: number of external genes affecting each gene
@@ -30,6 +30,7 @@ class Constants:
     P = 20 #: number of individuals in each species population
     T_SIZE = 3 #: size of selection and replacement tournament
     P_MUT = 1 / N #: per gene probability of mutation
+    P_MUT_GROW = 0.05 #: probability of adding or removing a gene
     P_CROSS = 0.8 #: probability of performing crossover
     REPLACE = 'worst' #: replace = {'worst', 'tournament'}
     M = 1000 #: number of children per parent to test via model
@@ -60,6 +61,7 @@ def get_filename():
         + 'c' + str(Constants.C) \
         + 'tsize' + str(Constants.T_SIZE) \
         + 'pmut' + str(Constants.P_MUT) \
+        + 'pmutgrow' + str(Constants.P_MUT_GROW) \
         + 'pcross' + str(Constants.P_CROSS) \
         + 'replace' + Constants.REPLACE \
         + 'evals' + str(Constants.MAX_EVALS)
@@ -84,6 +86,7 @@ def save_constants(f):
     f.write('%d,' % Constants.C)
     f.write('%d,' % Constants.T_SIZE)
     f.write('%f,' % Constants.P_MUT)
+    f.write('%f,' % Constants.P_MUT_GROW)
     f.write('%f,' % Constants.P_CROSS)
     f.write('%s,' % Constants.REPLACE)
     f.write('%d,' % Constants.M)
@@ -107,11 +110,12 @@ def read_constants(row):
     Constants.C = int(row[8])
     Constants.T_SIZE = int(row[9])
     Constants.P_MUT = float(row[10])
-    Constants.P_CROSS = float(row[11])
-    Constants.REPLACE = str(row[12])
-    Constants.M = int(row[13])
-    Constants.H = int(row[14])
-    Constants.MAX_ARCHIVE = int(row[15])
-    Constants.N_MODELS = int(row[16])
-    Constants.NKCS_TOPOLOGY = str(row[17])
-    Constants.MODEL = str(row[18])
+    Constants.P_MUT_GROW = float(row[11])
+    Constants.P_CROSS = float(row[12])
+    Constants.REPLACE = str(row[13])
+    Constants.M = int(row[14])
+    Constants.H = int(row[15])
+    Constants.MAX_ARCHIVE = int(row[16])
+    Constants.N_MODELS = int(row[17])
+    Constants.NKCS_TOPOLOGY = str(row[18])
+    Constants.MODEL = str(row[19])

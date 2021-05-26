@@ -35,16 +35,20 @@ class Ind:
         '''Returns a string representation of an individual.'''
         return str(self.genome) + ' => ' + str(self.fitness)
 
-    def expand(self):
-        '''Adds a gene to an individual.'''
-        if len(self.genome) < cons.N + cons.MAX_GROW:
-            if np.random.uniform(low=0, high=1) < cons.P_MUT:
+    def mutate_length(self):
+        '''Adds or removes a gene with 50/50 probability.'''
+        N = len(self.genome)
+        if np.random.uniform(low=0, high=1) < 0.5:
+            if N < cons.N + cons.MAX_GROW:
                 self.genome.append(np.random.randint(0, 2))
+        elif N > cons.N:
+            self.genome.pop()
 
     def mutate(self):
         '''Mutates an individual.'''
-        self.expand()
-        for i in range(cons.N):
+        if np.random.uniform(low=0, high=1) < cons.P_MUT_GROW:
+            self.mutate_length()
+        for i in range(len(self.genome)):
             if np.random.uniform(low=0, high=1) < cons.P_MUT:
                 if self.genome[i] == 0:
                     self.genome[i] = 1
@@ -54,15 +58,17 @@ class Ind:
     def one_point_crossover(self, parent):
         '''Performs one-point crossover.'''
         if np.random.uniform(low=0, high=1) < cons.P_CROSS:
-            p1 = np.random.randint(0, cons.N)
+            N = min(len(self.genome), len(parent.genome))
+            p1 = np.random.randint(0, N)
             for i in range(p1):
                 self.genome[i] = parent.genome[i]
 
     def two_point_crossover(self, parent):
         '''Performs two-point crossover.'''
         if np.random.uniform(low=0, high=1) < cons.P_CROSS:
-            p1 = np.random.randint(0, cons.N)
-            p2 = np.random.randint(0, cons.N) + 1
+            N = min(len(self.genome), len(parent.genome))
+            p1 = np.random.randint(0, N)
+            p2 = np.random.randint(0, N) + 1
             if p1 > p2:
                 p1, p2 = p2, p1
             elif p1 == p2:
@@ -73,7 +79,8 @@ class Ind:
     def uniform_crossover(self, parent):
         '''Performs uniform crossover.'''
         if np.random.uniform(low=0, high=1) < cons.P_CROSS:
-            for i in range(cons.N):
+            N = min(len(self.genome), len(parent.genome))
+            for i in range(N):
                 if np.random.uniform(low=0, high=1) < 0.5:
                     self.genome[i] = parent.genome[i]
 
@@ -134,20 +141,24 @@ class EA:
             self.archive_genes[s].pop(0)
             self.archive_fitness[s].pop(0)
 
-    def update_perf(self, evals, perf_best, perf_avg):
+    def update_perf(self, evals, perf_best, perf_avg, len_best):
         '''Updates current performance tracking.'''
         if self.evals % (cons.P * cons.S) == 0:
-            best = self.get_best_fit(0)
             avg = self.get_avg_fit(0)
+            b = self.get_best(0)
+            best_fit = self.pop[0][b].fitness
+            best_len = len(self.pop[0][b].genome)
             for s in range(1, cons.S):
-                b = self.get_best_fit(s)
-                if b > best:
-                    best = b
+                b = self.get_best(s)
+                if self.pop[s][b].fitness > best_fit:
+                    best_fit = self.pop[s][b].fitness
+                    best_len = len(self.pop[s][b].genome)
                 avg += self.get_avg_fit(s)
             gen = int((self.evals / (cons.P * cons.S)) - 1)
             evals[gen] = self.evals
-            perf_best[gen] = best
+            perf_best[gen] = best_fit
             perf_avg[gen] = avg / cons.S
+            len_best[gen] = best_len
 
     def create_offspring(self, p1, p2):
         '''Creates and returns a new offspring.'''
@@ -225,7 +236,7 @@ class EA:
     def print_archive(self, s):
         '''Prints the evaluated genes and fitnesses of a given species.'''
         for i in range(len(self.archive_genes[s])):
-            for n in range(cons.N):
+            for n in range(len(self.archive_genes[s][i].genome)):
                 print(str(self.archive_genes[s][i][n]), end='')
             print(',%.5f' % self.archive_fitness[s][i])
 
@@ -236,7 +247,7 @@ class EA:
             for p in range(cons.P):
                 print(self.pop[s][p].to_string())
 
-    def run_ea(self, nkcs, evals, pbest, pavg):
+    def run_ea(self, nkcs, evals, pbest, pavg, lbest):
         '''Executes a standard EA - partnering with the best candidates.'''
         while self.evals < cons.MAX_EVALS:
             for s in range(cons.S):
@@ -246,9 +257,9 @@ class EA:
                 team = self.get_team_best(s, child)
                 self.eval_team(nkcs, team)
                 self.add_offspring(s, child)
-                self.update_perf(evals, pbest, pavg)
+                self.update_perf(evals, pbest, pavg, lbest)
 
-    def run_sea(self, nkcs, evals, pbest, pavg):
+    def run_sea(self, nkcs, evals, pbest, pavg, lbest):
         '''Executes a surrogate-assisted EA.'''
         while self.evals < cons.MAX_EVALS:
             for s in range(cons.S):
@@ -267,4 +278,4 @@ class EA:
                 team = self.get_team_best(s, child)
                 self.eval_team(nkcs, team)
                 self.add_offspring(s, child)
-                self.update_perf(evals, pbest, pavg)
+                self.update_perf(evals, pbest, pavg, lbest)

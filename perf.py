@@ -24,7 +24,7 @@ import numpy as np
 from constants import Constants as cons
 from constants import save_constants, read_constants
 
-def save_data(filename, evals, perf_best, perf_avg):
+def save_data(filename, evals, perf_best, perf_avg, len_best):
     '''Writes the results to a data file.'''
     path = os.path.normpath('res/'+filename+'.dat')
     f = open(path, 'w')
@@ -36,6 +36,8 @@ def save_data(filename, evals, perf_best, perf_avg):
             f.write(',%f' % (perf_best[r][g]))
         for r in range(dim): # average from each run
             f.write(',%f' % (perf_avg[r][g]))
+        for r in range(dim): # length of the best from each run
+            f.write(',%d' % (len_best[r][g]))
         f.write('\n')
     f.close()
 
@@ -52,6 +54,7 @@ def read_data(filename):
         evals = np.zeros(cons.G)
         perf_best = np.zeros((N_RES, cons.G))
         perf_avg = np.zeros((N_RES, cons.G))
+        len_best = np.zeros((N_RES, cons.G))
         g = 0
         for row in archive:
             evals[g] = int(row[0])
@@ -59,5 +62,7 @@ def read_data(filename):
                 perf_best[col][g] = float(row[col + 1])
             for col in range(N_RES):
                 perf_avg[col][g] = float(row[N_RES + col + 1])
+            for col in range(N_RES):
+                len_best[col][g] = int(row[(2 * N_RES) + col + 1])
             g += 1
-    return evals, perf_best, perf_avg
+    return evals, perf_best, perf_avg, len_best

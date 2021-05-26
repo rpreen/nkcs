@@ -33,7 +33,7 @@ USE_TEX = False #: whether to use texlive for plot font
 CONF = 1 #: 1.96 = 95% confidence; 1 = standard error
 ALPHA = 0.3 #: transparency for shading confidence bounds
 MS = 5 #: marker size
-ME = 2 #: mark every
+ME = 50 #: mark every
 LW = 1 #: line width
 NUM_COLORS = 10 #: number of line colours
 
@@ -64,15 +64,17 @@ def get_label(l):
 
 def plot(filenames, plotname):
     '''Plots performance from multiple sets of runs.'''
-    fig = plt.figure(figsize=(6, 3))
-    ax = fig.add_subplot(1, 1, 1)
+    fig = plt.figure(figsize=(12, 6))
+    ax = fig.add_subplot(2, 2, 1)
+    ax1 = fig.add_subplot(2, 2, 2)
     cm = plt.get_cmap('tab10')
     cycler = plt.cycler(color=[cm(i/NUM_COLORS) for i in range(NUM_COLORS)])
     cycler += plt.cycler(marker=['s', 'o', '^', 'x', '*', '+', 'X'])
     ax.set_prop_cycle(cycler)
     for data in filenames:
-        evals, perf_best, perf_avg = read_data(data)
+        evals, perf_best, perf_avg, len_best = read_data(data)
         mean_best = np.mean(perf_best, axis=0)
+        mean_len = np.mean(len_best, axis=0)
         mean_avg = np.mean(perf_avg, axis=0)
         if PLOT_BESTS:
             ax.plot(evals, mean_best,
@@ -84,13 +86,21 @@ def plot(filenames, plotname):
                 linewidth=LW, markersize=MS, markevery=ME, label=get_label('avg'))
             ax.fill_between(evals, mean_avg - (CONF * stats.sem(perf_avg, axis=0)),
                 mean_avg + (CONF * stats.sem(perf_avg, axis=0)), alpha=ALPHA)
+        ax1.plot(evals, mean_len,
+            linewidth=LW, markersize=MS, markevery=ME, label=get_label('len'))
+        ax1.fill_between(evals, mean_len - (CONF * stats.sem(len_best, axis=0)),
+            mean_len + (CONF * stats.sem(len_best, axis=0)), alpha=ALPHA)
+
     ax.grid(linestyle='dotted', linewidth=1)
+    ax1.grid(linestyle='dotted', linewidth=1)
     #ax.set_ylim([3.2, 4.2])
     ax.set_xlim(xmin=0)
     ax.legend(loc='best', prop={'size': 10})
     plt.title(get_title(), fontsize=14)
     ax.set_xlabel('Evaluations', fontsize=12)
     ax.set_ylabel('Fitness', fontsize=12)
+    ax1.set_xlabel('Evaluations', fontsize=12)
+    ax1.set_ylabel('Genome Length', fontsize=12)
     path = os.path.normpath('res/'+str(plotname)+'.pdf')
     fig.savefig(path, bbox_inches='tight')
 
