@@ -31,7 +31,7 @@ class Constants:
     T_SIZE = 3 #: size of selection and replacement tournament
     P_MUT = 1 / N #: per gene probability of mutation
     P_MUT_GROW = 0.05 #: probability of adding or removing a gene
-    P_CROSS = 0.8 #: probability of performing crossover
+    P_CROSS = 0 #: probability of performing crossover
     REPLACE = 'worst' #: replace = {'worst', 'tournament'}
     M = 1000 #: number of children per parent to test via model
     MAX_ARCHIVE = 5000 #: max evaluated individuals for model training
