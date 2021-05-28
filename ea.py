@@ -36,24 +36,20 @@ class Ind:
         return str(self.genome) + ' => ' + str(self.fitness)
 
     def mutate_length(self):
-        '''Adds or removes a gene with 50/50 probability.'''
-        N = len(self.genome)
-        if np.random.uniform(low=0, high=1) < 0.5:
-            if N < cons.N + cons.MAX_GROW:
+        '''Adds gene.'''
+        if len(self.genome) < cons.N + cons.MAX_GROW:
                 self.genome.append(np.random.randint(0, 2))
-        elif N > cons.N:
-            self.genome.pop()
 
     def mutate(self):
         '''Mutates an individual.'''
-        if np.random.uniform(low=0, high=1) < cons.P_MUT_GROW:
+        if np.random.uniform(low=0, high=1) < 0.5:
             self.mutate_length()
-        for i in range(len(self.genome)):
-            if np.random.uniform(low=0, high=1) < cons.P_MUT:
-                if self.genome[i] == 0:
-                    self.genome[i] = 1
-                else:
-                    self.genome[i] = 0
+        else:
+            gene = np.random.randint(0, len(self.genome))
+            if self.genome[gene] == 0:
+                self.genome[gene] = 1
+            else:
+                self.genome[gene] = 0
 
     def one_point_crossover(self, parent):
         '''Performs one-point crossover.'''
