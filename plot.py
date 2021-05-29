@@ -49,7 +49,7 @@ def get_title():
         if cons.S > 1:
             title += ' $C$=' + str(cons.C) + ' $S$=' + str(cons.S)
     else:
-        title = 'N=' + str(cons.N) + ' K=' + str(cons.K)
+        title = 'P=' +str(cons.P) + ' N=' + str(cons.N) + ' K=' + str(cons.K)
         if cons.S > 1:
             title += ' C=' + str(cons.C) + ' S=' + str(cons.S)
     return title
@@ -76,6 +76,8 @@ def plot(filenames, plotname):
         mean_best = np.mean(perf_best, axis=0)
         mean_len = np.mean(len_best, axis=0)
         mean_avg = np.mean(perf_avg, axis=0)
+        max_len = np.max(len_best, axis=0)
+        min_len = np.min(len_best, axis=0)
         if PLOT_BESTS:
             ax.plot(evals, mean_best,
                 linewidth=LW, markersize=MS, markevery=ME, label=get_label('best'))
@@ -88,12 +90,15 @@ def plot(filenames, plotname):
                 mean_avg + (CONF * stats.sem(perf_avg, axis=0)), alpha=ALPHA)
         ax1.plot(evals, mean_len,
             linewidth=LW, markersize=MS, markevery=ME, label=get_label('len'))
-        ax1.fill_between(evals, mean_len - (CONF * stats.sem(len_best, axis=0)),
-            mean_len + (CONF * stats.sem(len_best, axis=0)), alpha=ALPHA)
+        #ax1.fill_between(evals, mean_len - (CONF * stats.sem(len_best, axis=0)),
+        #        mean_len + (CONF * stats.sem(len_best, axis=0)), alpha=ALPHA)
+        yerr = [mean_len - min_len, max_len - mean_len]
+        ax1.errorbar(evals, mean_len, yerr, errorevery=10, elinewidth=1, capsize=3, capthick=1)
 
     ax.grid(linestyle='dotted', linewidth=1)
     ax1.grid(linestyle='dotted', linewidth=1)
-    #ax.set_ylim([3.2, 4.2])
+    #ax.set_ylim([0.45, 0.75])
+    #ax1.set_ylim([19, 40])
     ax.set_xlim(xmin=0)
     ax.legend(loc='best', prop={'size': 10})
     plt.title(get_title(), fontsize=14)
