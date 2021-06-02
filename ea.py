@@ -29,7 +29,8 @@ class Ind:
     def __init__(self):
         '''Initialises a random individual.'''
         self.fitness = 0 #: fitness of the individual
-        self.genome = [np.random.randint(0, 2) for i in range(cons.N)] #: genome
+        #self.genome = [np.random.randint(0, 2) for i in range(cons.N)] #: genome
+        self.genome = np.random.randint(2, size=cons.N) #: genome
 
     def to_string(self):
         '''Returns a string representation of an individual.'''
@@ -38,7 +39,8 @@ class Ind:
     def mutate_length(self):
         '''Adds gene.'''
         if len(self.genome) < cons.N + cons.MAX_GROW:
-                self.genome.append(np.random.randint(0, 2))
+            self.genome = np.resize(self.genome, len(self.genome) + 1)
+            self.genome[-1] = np.random.randint(0, 2)
 
     def mutate(self):
         '''Mutates an individual.'''
@@ -260,14 +262,28 @@ class EA:
         while self.evals < cons.MAX_EVALS:
             for s in range(cons.S):
                 model = surrogate.Model()
-                model.fit(self.archive_genes[s], self.archive_fitness[s])
+
+                self.set_maxlen(self.archive_genes[s])
+                X_train = self.pad(self.archive_genes[s])
+                y_train = self.archive_fitness[s]
+
+                model.fit(X_train, y_train)
+
                 # best of M offspring from 2 parents
                 parent1 = self.pop[s][self.tournament(s)]
                 parent2 = self.pop[s][self.tournament(s)]
+
+                X = np.full((cons.M, self.maxlen), 0.5)
+
                 candidates = []
-                for _ in range(cons.M):
-                    candidates.append(self.create_offspring(parent1, parent2).genome)
-                scores = model.predict(candidates)
+                for i in range(cons.M):
+                    c = self.create_offspring(parent1, parent2).genome
+                    X[i][: len(c)] = c
+                    candidates.append(c)
+
+                X_predict = self.pad(X)
+                scores = model.predict(X_predict)
+
                 child = Ind()
                 child.genome = candidates[np.argmax(scores)]
                 # evaluate offspring
@@ -275,3 +291,13 @@ class EA:
                 self.eval_team(nkcs, team)
                 self.add_offspring(s, child)
                 self.update_perf(evals, pbest, pavg, lbest)
+
+    def set_maxlen(self, X):
+        self.maxlen = max(len(r) for r in X) + 1 # one extra for future mutation
+
+    def pad(self, X):
+        '''Returns a matrix padded to the maximum array length of X.'''
+        Z = np.full((len(X), self.maxlen), 0.5)
+        for enu, row in enumerate(X):
+            Z[enu, : len(row)] = row
+        return Z

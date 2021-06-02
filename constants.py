@@ -22,7 +22,7 @@ class Constants:
     '''Global constants.'''
     F = 10 #: number of different NKCS experiments to run
     E = 10 #: number of experiments per NKCS to run
-    G = 100 #: number of generations to run genetic algorithm
+    G = 25 #: number of generations to run genetic algorithm
     N = 20 #: number of genes (nodes/characteristics)
     K = 2 #: number of connections to other (internal) genes
     C = 2 #: number of external genes affecting each gene
@@ -38,8 +38,8 @@ class Constants:
     H = 20 #: number of hidden neurons for MLP
     N_MODELS = 10 #: number of surrogate models (for averaging, and std dev)
     PLOT = True #: plot graph
-    ACQUISITION = 'ea' #: acquisition = {'ea', 'ei', 'uc', 'pi', 'mean'}
-    MODEL = 'gp' #: surrogate model = {'gp', 'mlp', 'svr', 'linear', 'tree', 'gradient'}
+    ACQUISITION = 'mean' #: acquisition = {'ea', 'ei', 'uc', 'pi', 'mean'}
+    MODEL = 'mlp' #: surrogate model = {'gp', 'mlp', 'svr', 'linear', 'tree', 'gradient'}
     MAX_EVALS = P * S * G #: number of evaluations per experiment
     NKCS_TOPOLOGY = 'standard' #: topology = {'line', 'standard'}
     NUM_THREADS = 8 #: number of CPU threads for model building

@@ -20,6 +20,7 @@
 
 import sys
 import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPRegressor
 from sklearn.svm import SVR
@@ -104,6 +105,7 @@ class Model:
         self.output_scaler = StandardScaler()
         self.models = []
         self.mu_sample_opt = 0
+        self.maxlen = 0
 
     def fit(self, X, y):
         '''Trains a surrogate model using the evaluated genomes and fitnesses.'''
@@ -112,7 +114,7 @@ class Model:
         self.output_scaler.fit(y)
         y_train = self.output_scaler.transform(y).ravel()
         self.mu_sample_opt = np.max(y_train)
-        X_train = X # unscaled binary inputs
+        X_train = (X * 2) - 1 # scale features [-1, 1]
         # fit models
         if cons.MODEL == 'gp':
             self.models.append(fit_model(X_train, y_train))
@@ -122,14 +124,15 @@ class Model:
 
     def predict(self, X):
         '''Uses the surrogate model to predict the fitnesses of candidate genomes.'''
+        X_predict = (X * 2) - 1 # scale features [-1, 1]
         if cons.MODEL == 'gp': # only one GP model
-            mu, std = self.models[0].predict(X, return_std=True)
+            mu, std = self.models[0].predict(X_predict, return_std=True)
         else: # model prediction(s)
             n_models = len(self.models)
-            n_samples = len(X)
+            n_samples = len(X_predict)
             p = np.zeros((n_models, n_samples))
             for i in range(n_models):
-                p[i] = self.models[i].predict(X)
+                p[i] = self.models[i].predict(X_predict)
             if n_models > 1:
                 mu = np.mean(p, axis=0)
                 std = np.std(p, axis=0)
