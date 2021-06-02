@@ -36,7 +36,7 @@ class Constants:
     M = 1000 #: number of children per parent to test via model
     MAX_ARCHIVE = 5000 #: max evaluated individuals for model training
     H = 20 #: number of hidden neurons for MLP
-    N_MODELS = 10 #: number of surrogate models (for averaging, and std dev)
+    N_MODELS = 1 #: number of surrogate models (for averaging, and std dev)
     PLOT = True #: plot graph
     ACQUISITION = 'mean' #: acquisition = {'ea', 'ei', 'uc', 'pi', 'mean'}
     MODEL = 'mlp' #: surrogate model = {'gp', 'mlp', 'svr', 'linear', 'tree', 'gradient'}
