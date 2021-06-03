@@ -68,9 +68,10 @@ else: # create new fitness landscapes and initial populations
             ea.append(EA(nkcs[f]))
             ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
             r += 1
-    if cons.EXPERIMENT_SAVE:
-        with open('experiment.pkl', 'wb') as f:
-            dill.dump(ea, f)
+
+if cons.EXPERIMENT_SAVE: # save initial populations
+    with open('experiment.pkl', 'wb') as f:
+        dill.dump(ea, f)
 
 # run the experiments
 r = 0
@@ -89,7 +90,7 @@ for f in range(cons.F): # F NKCS functions
         bar.update(1)
 bar.close()
 
-if cons.EXPERIMENT_SAVE:
+if cons.EXPERIMENT_SAVE: # save fitness landscapes
     with open('experiment.pkl', 'a+b') as f:
         dill.dump(nkcs, f)
 
