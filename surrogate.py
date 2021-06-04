@@ -20,7 +20,6 @@
 
 import sys
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPRegressor
 from sklearn.svm import SVR
@@ -117,7 +116,7 @@ class Model:
         self.output_scaler.fit(y)
         y_train = self.output_scaler.transform(y).ravel()
         self.mu_sample_opt = np.max(y_train)
-        X_train = (X * 2) - 1 # scale features [-1, 1]
+        X_train = X # unscaled features [0, 1]
         # fit models
         if cons.MODEL == 'gp':
             self.models.append(fit_model(X_train, y_train))
@@ -127,7 +126,7 @@ class Model:
 
     def predict(self, X):
         '''Uses the surrogate model to predict the fitnesses of candidate genomes.'''
-        X_predict = (X * 2) - 1 # scale features [-1, 1]
+        X_predict = X # unscaled features [0, 1]
         if cons.MODEL == 'gp': # only one GP model
             mu, std = self.models[0].predict(X_predict, return_std=True)
         else: # model prediction(s)
