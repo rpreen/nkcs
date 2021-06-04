@@ -44,7 +44,10 @@ def acquisition(mu_sample_opt, mu, std):
         return mu + std
     if cons.ACQUISITION == 'pi': # probability of improvement
         return norm.cdf((mu - mu_sample_opt) / (std + 1E-9))
-    return mu # mean
+    if cons.ACQUISITION == 'mean': # mean
+        return mu
+    print('unknown acquisition method: ' + cons.ACQUISITION)
+    sys.exit()
 
 def model_gp(seed):
     '''Gaussian Process Regressor'''
