@@ -33,7 +33,7 @@ USE_TEX = False #: whether to use texlive for plot font
 CONF = 1 #: 1.96 = 95% confidence; 1 = standard error
 ALPHA = 0.3 #: transparency for shading confidence bounds
 MS = 5 #: marker size
-ME = 50 #: mark every
+ME = 5 #: mark every
 LW = 1 #: line width
 NUM_COLORS = 10 #: number of line colours
 
@@ -58,8 +58,13 @@ def get_label(l):
     '''Returns the plot label.'''
     L = cons.ACQUISITION.upper()
     if cons.ACQUISITION != 'ea':
+        if cons.MODEL != 'gp':
+            L += '-' + str(cons.N_MODELS)
         L += '-' + cons.MODEL.upper()
-    L += ' ' + l
+        if cons.MODEL == 'mlp':
+            L += ' H=' + str(cons.H)
+    if not l == '':
+        L += ' ' + l
     return L
 
 def plot(filenames, plotname):
@@ -88,12 +93,9 @@ def plot(filenames, plotname):
                 linewidth=LW, markersize=MS, markevery=ME, label=get_label('avg'))
             ax.fill_between(evals, mean_avg - (CONF * stats.sem(perf_avg, axis=0)),
                 mean_avg + (CONF * stats.sem(perf_avg, axis=0)), alpha=ALPHA)
-        ax1.plot(evals, mean_len,
-            linewidth=LW, markersize=MS, markevery=ME, label=get_label('len'))
-        #ax1.fill_between(evals, mean_len - (CONF * stats.sem(len_best, axis=0)),
-        #        mean_len + (CONF * stats.sem(len_best, axis=0)), alpha=ALPHA)
         yerr = [mean_len - min_len, max_len - mean_len]
-        ax1.errorbar(evals, mean_len, yerr, errorevery=10, elinewidth=1, capsize=3, capthick=1)
+        ax1.errorbar(evals, mean_len, yerr,
+            errorevery=2, elinewidth=1, capsize=3, capthick=1, label=get_label(''))
 
     ax.grid(linestyle='dotted', linewidth=1)
     ax1.grid(linestyle='dotted', linewidth=1)
@@ -101,6 +103,7 @@ def plot(filenames, plotname):
     #ax1.set_ylim([19, 40])
     ax.set_xlim(xmin=0)
     ax.legend(loc='best', prop={'size': 10})
+    ax1.legend(loc='best', prop={'size': 10})
     plt.title(get_title(), fontsize=14)
     ax.set_xlabel('Evaluations', fontsize=12)
     ax.set_ylabel('Fitness', fontsize=12)
