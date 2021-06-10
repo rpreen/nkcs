@@ -44,14 +44,16 @@ if USE_TEX:
 
 def get_title():
     '''Returns the title.'''
-    if USE_TEX:
-        title = '$N$=' + str(cons.N) + ' $K$=' + str(cons.K)
-        if cons.S > 1:
-            title += ' $C$=' + str(cons.C) + ' $S$=' + str(cons.S)
-    else:
-        title = 'P=' +str(cons.P) + ' N=' + str(cons.N) + ' K=' + str(cons.K)
-        if cons.S > 1:
-            title += ' C=' + str(cons.C) + ' S=' + str(cons.S)
+    title = 'P=' +str(cons.P) + ' N=' + str(cons.N) + ' K=' + str(cons.K)
+    if cons.S > 1:
+        title += ' C=' + str(cons.C) + ' S=' + str(cons.S)
+    return title
+
+def get_title_tex():
+    '''Returns the title with LaTeX formatting.'''
+    title = '$P$=' +str(cons.P) + ' $N$=' + str(cons.N) + ' $K$=' + str(cons.K)
+    if cons.S > 1:
+        title += ' $C$=' + str(cons.C) + ' $S$=' + str(cons.S)
     return title
 
 def get_label(l):
@@ -66,6 +68,20 @@ def get_label(l):
     if not l == '':
         L += ' ' + l
     return L
+
+def get_label_tex(l):
+    '''Returns the plot label with LaTeX formatting.'''
+    L = cons.ACQUISITION.upper()
+    if cons.ACQUISITION != 'ea':
+        if cons.MODEL != 'gp':
+            L += '-' + str(cons.N_MODELS)
+        L += '-' + cons.MODEL.upper()
+        if cons.MODEL == 'mlp':
+            L += ' $H$=' + str(cons.H)
+    if not l == '':
+        L += ' ' + l
+    return L
+
 
 def plot(filenames, plotname):
     '''Plots performance from multiple sets of runs.'''
@@ -84,18 +100,21 @@ def plot(filenames, plotname):
         max_len = np.max(len_best, axis=0)
         min_len = np.min(len_best, axis=0)
         if PLOT_BESTS:
+            label = get_label_tex('best') if USE_TEX else get_label('best')
             ax.plot(evals, mean_best,
-                linewidth=LW, markersize=MS, markevery=ME, label=get_label('best'))
+                linewidth=LW, markersize=MS, markevery=ME, label=label)
             ax.fill_between(evals, mean_best - (CONF * stats.sem(perf_best, axis=0)),
                 mean_best + (CONF * stats.sem(perf_best, axis=0)), alpha=ALPHA)
         if PLOT_AVERAGES:
+            label = get_label_tex('avg') if USE_TEX else get_label('avg')
             ax.plot(evals, mean_avg,
-                linewidth=LW, markersize=MS, markevery=ME, label=get_label('avg'))
+                linewidth=LW, markersize=MS, markevery=ME, label=label)
             ax.fill_between(evals, mean_avg - (CONF * stats.sem(perf_avg, axis=0)),
                 mean_avg + (CONF * stats.sem(perf_avg, axis=0)), alpha=ALPHA)
         yerr = [mean_len - min_len, max_len - mean_len]
+        label = get_label_tex('') if USE_TEX else get_label('')
         ax1.errorbar(evals, mean_len, yerr,
-            errorevery=2, elinewidth=1, capsize=3, capthick=1, label=get_label(''))
+            errorevery=2, elinewidth=1, capsize=3, capthick=1, label=label)
 
     ax.grid(linestyle='dotted', linewidth=1)
     ax1.grid(linestyle='dotted', linewidth=1)
@@ -104,7 +123,9 @@ def plot(filenames, plotname):
     ax.set_xlim(xmin=0)
     ax.legend(loc='best', prop={'size': 10})
     ax1.legend(loc='best', prop={'size': 10})
-    plt.title(get_title(), fontsize=14)
+    title = get_title_tex() if USE_TEX else get_title()
+    ax.set_title(title, fontsize=14)
+    ax1.set_title(title, fontsize=14)
     ax.set_xlabel('Evaluations', fontsize=12)
     ax.set_ylabel('Fitness', fontsize=12)
     ax1.set_xlabel('Evaluations', fontsize=12)
@@ -114,8 +135,8 @@ def plot(filenames, plotname):
 
 def stat(filename1, filename2, generation):
     '''Compares the best individuals at a specified generation.'''
-    evals1, perf_best1, perf_avg1 = read_data(filename1)
-    evals2, perf_best2, perf_avg2 = read_data(filename2)
+    evals1, perf_best1, perf_avg1, len_best1 = read_data(filename1)
+    evals2, perf_best2, perf_avg2, len_best2 = read_data(filename2)
     a = perf_best1[:, generation]
     b = perf_best2[:, generation]
     print('A: MEAN=%.5f, SD=%.5f, SE=%.5f, N=%d, MIN=%.5f, MEDIAN=%.5f' % (
