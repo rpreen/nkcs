@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.8
 #
 # Copyright (C) 2019--2021 Richard Preen <rpreen@gmail.com>
 #
@@ -19,30 +19,31 @@
 '''Plots experimental results.'''
 
 import os
+from typing import List, Final
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 from constants import Constants as cons
 from perf import read_data
 
-FILE_LIST = [ ] # add data file names here (without .dat)
+FILE_LIST: List[str] = [ ] # add data file names here (without .dat)
 
-PLOT_BESTS = True #: whether to plot the the best fitnesses
-PLOT_AVERAGES = False #: whether to plot the mean fitnesses
-USE_TEX = False #: whether to use texlive for plot font
-CONF = 1 #: 1.96 = 95% confidence; 1 = standard error
-ALPHA = 0.3 #: transparency for shading confidence bounds
-MS = 5 #: marker size
-ME = 2 #: mark every
-LW = 1 #: line width
-NUM_COLORS = 10 #: number of line colours
+PLOT_BESTS: Final[bool] = True #: whether to plot the the best fitnesses
+PLOT_AVERAGES: Final[bool] = False #: whether to plot the mean fitnesses
+USE_TEX: Final[bool] = False #: whether to use texlive for plot font
+CONF: Final[float] = 1 #: 1.96 = 95% confidence; 1 = standard error
+ALPHA: Final[float] = 0.3 #: transparency for shading confidence bounds
+MS: Final[int] = 5 #: marker size
+ME: Final[int] = 2 #: mark every
+LW: Final[int] = 1 #: line width
+NUM_COLORS: Final[int] = 10 #: number of line colours
 
 if USE_TEX:
     plt.rc('font',**{'family':'serif','serif':['Palatino']})
     params = { 'text.usetex': True, 'text.latex.preamble': r"\usepackage{amstext}" }
     plt.rcParams.update(params)
 
-def get_title():
+def get_title() -> str:
     '''Returns the title.'''
     if USE_TEX:
         title = '$N$=' + str(cons.N) + ' $K$=' + str(cons.K)
@@ -54,7 +55,7 @@ def get_title():
             title += ' C=' + str(cons.C) + ' S=' + str(cons.S)
     return title
 
-def get_label(l):
+def get_label(l: str) -> str:
     '''Returns the plot label.'''
     L = cons.ACQUISITION.upper()
     if cons.ACQUISITION != 'ea':
@@ -62,7 +63,7 @@ def get_label(l):
     L += ' ' + l
     return L
 
-def plot(filenames, plotname):
+def plot(filenames: List[str], plotname: str) -> None:
     '''Plots performance from multiple sets of runs.'''
     fig = plt.figure(figsize=(6, 3))
     ax = fig.add_subplot(1, 1, 1)
@@ -91,15 +92,15 @@ def plot(filenames, plotname):
     plt.title(get_title(), fontsize=14)
     ax.set_xlabel('Evaluations', fontsize=12)
     ax.set_ylabel('Fitness', fontsize=12)
-    path = os.path.normpath('res/'+str(plotname)+'.pdf')
+    path: Final[str] = os.path.normpath('res/'+str(plotname)+'.pdf')
     fig.savefig(path, bbox_inches='tight')
 
-def stat(filename1, filename2, generation):
+def stat(filename1: str, filename2: str, generation: int) -> None:
     '''Compares the best individuals at a specified generation.'''
     evals1, perf_best1, perf_avg1 = read_data(filename1)
     evals2, perf_best2, perf_avg2 = read_data(filename2)
-    a = perf_best1[:, generation]
-    b = perf_best2[:, generation]
+    a: np.ndarray = perf_best1[:, generation]
+    b: np.ndarray = perf_best2[:, generation]
     print('A: MEAN=%.5f, SD=%.5f, SE=%.5f, N=%d, MIN=%.5f, MEDIAN=%.5f' % (
         np.mean(a, axis=0), np.std(a, axis=0), stats.sem(a, axis=0), len(a),
         np.min(a, axis=0), np.median(a, axis=0)))

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.8
 #
 # Copyright (C) 2019--2021 Richard Preen <rpreen@gmail.com>
 #
@@ -20,44 +20,46 @@
 
 import os
 import csv
+from typing import Tuple, Final
 import numpy as np
 from constants import Constants as cons
 from constants import save_constants, read_constants
 
-def save_data(filename, evals, perf_best, perf_avg):
+def save_data(filename: str, evals: np.ndarray, perf_best: np.ndarray,
+        perf_avg: np.ndarray) -> None:
     '''Writes the results to a data file.'''
-    path = os.path.normpath('res/'+filename+'.dat')
-    f = open(path, 'w')
-    save_constants(f)
-    dim = cons.F * cons.E
+    path: Final[str] = os.path.normpath('res/'+filename+'.dat')
+    fp = open(path, 'w')
+    save_constants(fp)
+    dim: Final[int] = cons.F * cons.E
     for g in range(cons.G):
-        f.write('%d' % (evals[0][g])) # evaluations
+        fp.write('%d' % (evals[0][g])) # evaluations
         for r in range(dim): # best from each run
-            f.write(',%f' % (perf_best[r][g]))
+            fp.write(',%f' % (perf_best[r][g]))
         for r in range(dim): # average from each run
-            f.write(',%f' % (perf_avg[r][g]))
-        f.write('\n')
-    f.close()
+            fp.write(',%f' % (perf_avg[r][g]))
+        fp.write('\n')
+    fp.close()
 
-def read_data(filename):
+def read_data(filename: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     '''Reads the results from a data file.'''
-    path = os.path.normpath('res/'+filename+'.dat')
+    path: Final[str] = os.path.normpath('res/'+filename+'.dat')
     with open(path, 'r') as csvfile:
         archive = csv.reader(csvfile, delimiter=',')
         # read constants from the header row
         row = next(archive)
         read_constants(row)
         # data rows
-        N_RES = cons.F * cons.E
+        n_res = cons.F * cons.E
         evals = np.zeros(cons.G)
-        perf_best = np.zeros((N_RES, cons.G))
-        perf_avg = np.zeros((N_RES, cons.G))
+        perf_best = np.zeros((n_res, cons.G))
+        perf_avg = np.zeros((n_res, cons.G))
         g = 0
         for row in archive:
             evals[g] = int(row[0])
-            for col in range(N_RES):
+            for col in range(n_res):
                 perf_best[col][g] = float(row[col + 1])
-            for col in range(N_RES):
-                perf_avg[col][g] = float(row[N_RES + col + 1])
+            for col in range(n_res):
+                perf_avg[col][g] = float(row[n_res + col + 1])
             g += 1
     return evals, perf_best, perf_avg

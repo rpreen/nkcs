@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.8
 #
 # Copyright (C) 2019--2021 Richard Preen <rpreen@gmail.com>
 #
@@ -19,20 +19,19 @@
 '''Models for surrogate-assisted evolution.'''
 
 import sys
-import numpy as np
+from typing import Tuple, List, Optional, Union
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPRegressor
-from sklearn.svm import SVR
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.linear_model import LinearRegression
+from sklearn.gaussian_process.kernels import ConstantKernel
 from scipy.stats import norm
 from joblib import Parallel, delayed
+import numpy as np
 from constants import Constants as cons
+np.set_printoptions(suppress=True)
 
-def acquisition(mu_sample_opt, mu, std):
+def acquisition(mu_sample_opt: float, mu: np.ndarray, std: np.ndarray) -> np.ndarray:
     '''Applies the acquisition function to predicted samples.'''
     if cons.ACQUISITION == 'ei': # expected improvement
         XI = 0.01
@@ -43,15 +42,18 @@ def acquisition(mu_sample_opt, mu, std):
         return mu + std
     if cons.ACQUISITION == 'pi': # probability of improvement
         return norm.cdf((mu - mu_sample_opt) / (std + 1E-9))
-    return mu # mean
+    if cons.ACQUISITION == 'mean': # mean
+        return mu
+    print('unknown acquisition method: ' + cons.ACQUISITION)
+    sys.exit()
 
-def model_gp(seed):
+def model_gp(seed: Optional[int]) -> GaussianProcessRegressor:
     '''Gaussian Process Regressor'''
-    kernel = RBF(length_scale=1)
-    return GaussianProcessRegressor(kernel=kernel,
+    kernel = ConstantKernel(1.0) * RBF(length_scale=1.0)
+    return GaussianProcessRegressor(kernel=kernel,# n_restarts_optimizer=10,
         random_state=seed, normalize_y=False, copy_X_train=False)
 
-def model_mlp(seed):
+def model_mlp(seed: Optional[int]) -> MLPRegressor:
     '''MLP Regressor'''
     return MLPRegressor(hidden_layer_sizes=(cons.H,), activation='relu',
         solver='lbfgs', alpha=0.001, batch_size='auto', learning_rate='constant',
@@ -60,37 +62,12 @@ def model_mlp(seed):
         momentum=0.9, nesterovs_momentum=True, early_stopping=True,
         validation_fraction=0.1, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
 
-def model_svr():
-    '''Support Vector Regression'''
-    return SVR(kernel='rbf')
-
-def model_linear():
-    '''Linear Regression'''
-    return LinearRegression()
-
-def model_gradient(seed):
-    '''Gradient Boosting Regressor'''
-    return GradientBoostingRegressor(n_estimators=100, learning_rate=0.1,
-        max_depth=3, random_state=seed, loss='ls')
-
-def model_tree(seed):
-    '''Decision Tree Regressor'''
-    return DecisionTreeRegressor(random_state=seed)
-
-def fit_model(X, y, seed=None):
+def fit_model(X, y, seed: int = None) -> Union[GaussianProcessRegressor, MLPRegressor]:
     '''Trains a surrogate model.'''
     if cons.MODEL == 'gp':
         model = model_gp(seed)
     elif cons.MODEL == 'mlp':
         model = model_mlp(seed)
-    elif cons.MODEL == 'svr':
-        model = model_svr()
-    elif cons.MODEL == 'tree':
-        model = model_tree(seed)
-    elif cons.MODEL == 'linear':
-        model = model_linear()
-    elif cons.MODEL == 'gradient':
-        model = model_gradient(seed)
     else:
         print('unsupported surrogate model')
         sys.exit()
@@ -99,46 +76,51 @@ def fit_model(X, y, seed=None):
 class Model:
     '''A surrogate model for the NKCS EA.'''
 
-    def __init__(self):
+    def __init__(self) -> None:
         '''Initialises a surrogate model.'''
-        self.output_scaler = StandardScaler()
-        self.models = []
-        self.mu_sample_opt = 0
+        self.output_scaler: StandardScaler = StandardScaler()
+        self.input_scaler: StandardScaler = StandardScaler()
+        self.models: List[Union[GaussianProcessRegressor, MLPRegressor]] = []
+        self.mu_sample_opt: float = 0
 
-    def fit(self, X, y):
+    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
         '''Trains a surrogate model using the evaluated genomes and fitnesses.'''
-        # normalise training data (zero mean and unit variance)
-        y = np.asarray(y).reshape(-1, 1)
-        self.output_scaler.fit(y)
-        y_train = self.output_scaler.transform(y).ravel()
-        self.mu_sample_opt = np.max(y_train)
-        X_train = X # unscaled binary inputs
-        # fit models
+        y_train = self.output_scaler.fit_transform(y.reshape(-1, 1)).ravel()
+        X_train = X #self.input_scaler.fit_transform(X)
         if cons.MODEL == 'gp':
             self.models.append(fit_model(X_train, y_train))
         else:
             self.models = Parallel(n_jobs=cons.NUM_THREADS)(delayed
                 (fit_model)(X_train, y_train) for _ in range(cons.N_MODELS))
+        #mu_sample, _ = self.predict(X_train)
+        #self.mu_sample_opt = np.max(mu_sample)
+        self.mu_sample_opt = np.max(y_train)
 
-    def predict(self, X):
+    def __predict(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         '''Uses the surrogate model to predict the fitnesses of candidate genomes.'''
+        X_predict = X #self.input_scaler.transform(X)
         if cons.MODEL == 'gp': # only one GP model
-            mu, std = self.models[0].predict(X, return_std=True)
+            mu, std = self.models[0].predict(X_predict, return_std=True)
         else: # model prediction(s)
             n_models = len(self.models)
-            n_samples = len(X)
+            n_samples = len(X_predict)
             p = np.zeros((n_models, n_samples))
             for i in range(n_models):
-                p[i] = self.models[i].predict(X)
+                p[i] = self.models[i].predict(X_predict)
             if n_models > 1:
                 mu = np.mean(p, axis=0)
                 std = np.std(p, axis=0)
             else:
                 mu = p[0]
                 std = 0
+        return mu, std
+
+    def score(self, X: np.ndarray) -> np.ndarray:
+        '''Returns the utility scores of candidate genomes.'''
+        mu, std = self.__predict(X)
         return acquisition(self.mu_sample_opt, mu, std)
 
-    def print_score(self, X, y):
+    def print_score(self, X: np.ndarray, y: np.ndarray) -> None:
         '''Prints the R squared model scores.'''
         for model in self.models:
             print('rsquared = ' + str(model.score(X, y)))

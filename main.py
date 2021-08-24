@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.8
 #
 # Copyright (C) 2019--2021 Richard Preen <rpreen@gmail.com>
 #
@@ -18,13 +18,15 @@
 
 '''Main script for starting NKCS (co)evolutionary experiments.'''
 
+from __future__ import annotations
 import os
 import sys
 import warnings
+from typing import List, Final
 import dill
 from tqdm import tqdm
 from constants import Constants as cons # parameters are in constants.py
-from constants import get_filename
+from constants import cons_to_string
 
 # set number of CPU threads
 os.environ['OMP_NUM_THREADS'] = str(cons.NUM_THREADS)
@@ -41,19 +43,19 @@ from perf import save_data
 from plot import plot
 
 # results storage
-N_RES = cons.F * cons.E
-evals = np.zeros((N_RES, cons.G))
-perf_best = np.zeros((N_RES, cons.G))
-perf_avg = np.zeros((N_RES, cons.G))
+N_RES: Final[int] = cons.F * cons.E
+evals: np.ndarray = np.zeros((N_RES, cons.G))
+perf_best: np.ndarray = np.zeros((N_RES, cons.G))
+perf_avg: np.ndarray = np.zeros((N_RES, cons.G))
 
-r = 0 #: run counter
-nkcs = [] #: NKCS landscapes
-ea = [] #: EA populations
+r: int = 0 #: run counter
+nkcs: List[NKCS] = [] #: NKCS landscapes
+ea: List[EA] = [] #: EA populations
 
 if cons.EXPERIMENT_LOAD: # reuse fitness landscapes and initial populations
-    with open('experiment.pkl', 'rb') as f:
-        ea = dill.load(f)
-        nkcs = dill.load(f)
+    with open('experiment.pkl', 'rb') as fp:
+        ea = dill.load(fp)
+        nkcs = dill.load(fp)
     if len(nkcs) != cons.F or len(ea) != N_RES:
         print('loaded experiment does not match constants')
         sys.exit()
@@ -65,13 +67,14 @@ else: # create new fitness landscapes and initial populations
     for f in range(cons.F):
         nkcs.append(NKCS())
         for _ in range(cons.E):
-            ea.append(EA(nkcs[f]))
+            ea.append(EA())
+            ea[r].run_initial(nkcs[f])
             ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
             r += 1
 
 if cons.EXPERIMENT_SAVE: # save initial populations
-    with open('experiment.pkl', 'wb') as f:
-        dill.dump(ea, f)
+    with open('experiment.pkl', 'wb') as fp:
+        dill.dump(ea, fp)
 
 # run the experiments
 r = 0
@@ -91,11 +94,11 @@ for f in range(cons.F): # F NKCS functions
 bar.close()
 
 if cons.EXPERIMENT_SAVE: # save fitness landscapes
-    with open('experiment.pkl', 'a+b') as f:
-        dill.dump(nkcs, f)
+    with open('experiment.pkl', 'a+b') as fp:
+        dill.dump(nkcs, fp)
 
 # write performance to a file and plot results
-FILENAME = get_filename()
+FILENAME: Final[str] = cons_to_string()
 save_data(FILENAME, evals, perf_best, perf_avg)
 if cons.PLOT:
     plot([FILENAME], FILENAME)

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.8
 #
 # Copyright (C) 2019--2021 Richard Preen <rpreen@gmail.com>
 #
@@ -18,74 +18,62 @@
 
 '''Evolutionary algorithms for NKCS.'''
 
+from __future__ import annotations
+import random
+from typing import List, Final
 from copy import deepcopy
+from operator import attrgetter
 import numpy as np
-from constants import Constants as cons
 import surrogate
+from nkcs import NKCS
+from constants import Constants as cons
 
 class Ind:
     '''A binary NKCS individual within an evolutionary algorithm.'''
 
-    def __init__(self):
+    def __init__(self) -> None:
         '''Initialises a random individual.'''
-        self.fitness = 0 #: fitness of the individual
-        self.genome = [np.random.randint(0, 2) for i in range(cons.N)] #: genome
+        self.fitness: float = 0 #: fitness
+        self.genome: np.ndarray = np.random.randint(2, size=cons.N) #: genome
 
-    def to_string(self):
+    def to_string(self) -> str:
         '''Returns a string representation of an individual.'''
-        return str(self.genome) + ' => ' + str(self.fitness)
+        return ','.join([str(gene) for gene in self.genome]) \
+            + ',%f' % (self.fitness)
 
-    def mutate(self):
+    def mutate(self) -> None:
         '''Mutates an individual.'''
-        for i in range(cons.N):
+        for i in range(len(self.genome)):
             if np.random.uniform(low=0, high=1) < cons.P_MUT:
                 if self.genome[i] == 0:
                     self.genome[i] = 1
                 else:
                     self.genome[i] = 0
 
-    def one_point_crossover(self, parent):
-        '''Performs one-point crossover.'''
-        if np.random.uniform(low=0, high=1) < cons.P_CROSS:
-            p1 = np.random.randint(0, cons.N)
-            for i in range(p1):
-                self.genome[i] = parent.genome[i]
-
-    def two_point_crossover(self, parent):
-        '''Performs two-point crossover.'''
-        if np.random.uniform(low=0, high=1) < cons.P_CROSS:
-            p1 = np.random.randint(0, cons.N)
-            p2 = np.random.randint(0, cons.N) + 1
-            if p1 > p2:
-                p1, p2 = p2, p1
-            elif p1 == p2:
-                p2 += 1
-            for i in range(p1, p2):
-                self.genome[i] = parent.genome[i]
-
-    def uniform_crossover(self, parent):
+    def uniform_crossover(self, parent: Ind) -> None:
         '''Performs uniform crossover.'''
-        if np.random.uniform(low=0, high=1) < cons.P_CROSS:
-            for i in range(cons.N):
-                if np.random.uniform(low=0, high=1) < 0.5:
-                    self.genome[i] = parent.genome[i]
+        for i in range(len(self.genome)):
+            if np.random.uniform(low=0, high=1) < 0.5:
+                self.genome[i] = parent.genome[i]
 
 class EA:
     '''NKCS evolutionary algorithm.'''
 
-    def __init__(self, nkcs):
+    def __init__(self) -> None:
         '''Initialises the evolutionary algorithm.'''
-        self.evals = 0 #: number of evaluations performed
-        self.archive_genes = [[] for s in range(cons.S)] #: evaluated genes
-        self.archive_fitness = [[] for s in range(cons.S)] #: corresponding fitnesses
+        self.evals: int = 0 #: number of evaluations performed
+        self.archive: List[List[Ind]] = [[] for _ in range(cons.S)] #: archive
+        self.pop: List[List[Ind]] = [] #: current species populations
+
+    def run_initial(self, nkcs: NKCS) -> None:
+        '''Generates new random initial populations.'''
         # create the initial populations
-        self.pop = []
-        for s in range(cons.S):
-            species = [Ind() for p in range(cons.P)]
+        for _ in range(cons.S):
+            species = [Ind() for _ in range(cons.P)]
             self.pop.append(species)
         # select random initial partners
-        rpartners = []
-        team = []
+        rpartners: List[Ind] = []
+        team: List[Ind] = []
         for s in range(cons.S):
             r = self.pop[s][np.random.randint(0, cons.P)]
             rpartners.append(r)
@@ -94,166 +82,139 @@ class EA:
         for s in range(cons.S):
             for p in range(cons.P):
                 team[s] = self.pop[s][p]
-                team[s].fitness = nkcs.calc_team_fit(team)
-                self.update_archive(s, team[s].genome, team[s].fitness)
+                genomes = np.asarray([ind.genome for ind in team])
+                team[s].fitness = nkcs.calc_team_fit(genomes)
+                self.__update_archive(s, team[s])
                 self.evals += 1
             team[s] = rpartners[s]
 
-    def eval_team(self, nkcs, team):
+    def __eval_team(self, nkcs: NKCS, team: List[Ind]) -> None:
         '''Evaluates a candidate team.
         Assigns fitness to each individual if it's the best seen.'''
-        team_fit = nkcs.calc_team_fit(team)
+        genomes = np.asarray([ind.genome for ind in team])
+        team_fit: Final[float] = nkcs.calc_team_fit(genomes)
         for s in range(cons.S):
             if team[s].fitness < team_fit:
                 team[s].fitness = team_fit
-                self.update_archive(s, team[s].genome, team[s].fitness)
         self.evals += 1 # total team evals performed
 
-    def get_team_best(self, sp, child):
+    def __get_team_best(self, s: int, child: Ind) -> List[Ind]:
         '''Returns a team assembled with the best partners for a child.'''
-        team = []
-        for s in range(cons.S):
-            if s != sp:
-                team.append(self.pop[s][self.get_best(s)])
+        team: List[Ind] = []
+        for sp in range(cons.S):
+            if sp != s:
+                team.append(self.get_best(sp))
             else:
                 team.append(child)
         return team
 
-    def update_archive(self, s, genome, fitness):
+    def __update_archive(self, s: int, p: Ind) -> None:
         '''Adds an evaluated individual to the species archive.'''
-        self.archive_genes[s].append(genome) # unscaled
-        self.archive_fitness[s].append(fitness)
-        if len(self.archive_genes[s]) > cons.MAX_ARCHIVE:
-            self.archive_genes[s].pop(0)
-            self.archive_fitness[s].pop(0)
+        self.archive[s].append(p)
+        if len(self.archive[s]) > cons.MAX_ARCHIVE:
+            self.archive[s].pop(0)
 
-    def update_perf(self, evals, perf_best, perf_avg):
+    def update_perf(self, evals: List[int], perf_best: np.ndarray, perf_avg: np.ndarray):
         '''Updates current performance tracking.'''
         if self.evals % (cons.P * cons.S) == 0:
-            best = self.get_best_fit(0)
-            avg = self.get_avg_fit(0)
-            for s in range(1, cons.S):
-                b = self.get_best_fit(s)
-                if b > best:
-                    best = b
-                avg += self.get_avg_fit(s)
-            gen = int((self.evals / (cons.P * cons.S)) - 1)
-            evals[gen] = self.evals
-            perf_best[gen] = best
-            perf_avg[gen] = avg / cons.S
+            g: Final[int] = int((self.evals / (cons.P * cons.S)) - 1)
+            evals[g] = self.evals
+            perf_best[g] = np.max([self.get_best_fit(s) for s in range(cons.S)])
+            perf_avg[g] = np.mean([self.get_avg_fit(s) for s in range(cons.S)])
 
-    def create_offspring(self, p1, p2):
+    def __create_offspring(self, p1: Ind, p2: Ind) -> Ind:
         '''Creates and returns a new offspring.'''
         child = deepcopy(p1)
         child.fitness = 0
-        child.uniform_crossover(p2)
+        if np.random.uniform(low=0, high=1) < cons.P_CROSS:
+            child.uniform_crossover(p2)
         child.mutate()
         return child
 
-    def add_offspring(self, s, child):
-        '''Adds an offspring to the species population.'''
+    def __add_offspring(self, s: int, child: Ind) -> None:
+        '''Adds an offspring to the population and archive.'''
         if cons.REPLACE == 'tournament':
-            replace = self.neg_tournament(s)
-            self.pop[s][replace] = deepcopy(child)
+            self.pop[s].remove(self.__neg_tournament(s))
+            self.pop[s].append(deepcopy(child))
         else:
-            replace = self.get_worst(s)
-            if self.pop[s][replace].fitness < child.fitness:
-                self.pop[s][replace] = deepcopy(child)
+            worst = self.get_worst(s)
+            if worst.fitness < child.fitness:
+                self.pop[s].remove(worst)
+                self.pop[s].append(deepcopy(child))
+        self.__update_archive(s, child)
 
-    def tournament(self, s):
+    def __tournament(self, s: int) -> Ind:
         '''Returns a parent selected by tournament.'''
-        best = np.random.randint(0, cons.P)
-        fbest = self.pop[s][best].fitness
-        for _ in range(cons.T_SIZE):
-            competitor = np.random.randint(0, cons.P)
-            fcompetitor = self.pop[s][competitor].fitness
-            if fcompetitor > fbest:
-                best = competitor
-                fbest = fcompetitor
-        return best
+        tournament = random.sample(self.pop[s], cons.T_SIZE)
+        return max(tournament, key=attrgetter('fitness'))
 
-    def neg_tournament(self, s):
+    def __neg_tournament(self, s: int) -> Ind:
         '''Returns an individual selected by negative tournament.'''
-        worst = np.random.randint(0, cons.P)
-        fworst = self.pop[s][worst].fitness
-        for _ in range(cons.T_SIZE):
-            competitor = np.random.randint(0, cons.P)
-            fcompetitor = self.pop[s][competitor].fitness
-            if fcompetitor < fworst:
-                worst = competitor
-                fworst = fcompetitor
-        return worst
+        tournament = random.sample(self.pop[s], cons.T_SIZE)
+        return min(tournament, key=attrgetter('fitness'))
 
-    def get_worst(self, s):
-        '''Returns the index of the least fit individual in a species.'''
-        worst = 0
-        for i in range(1, cons.P):
-            if self.pop[s][i].fitness < self.pop[s][worst].fitness:
-                worst = i
-        return worst
+    def get_worst(self, s: int) -> Ind:
+        '''Returns the index of the least fit individual in the population.'''
+        return min(self.pop[s], key=attrgetter('fitness'))
 
-    def get_best(self, s):
-        '''Returns the index of the best individual in a given species.'''
-        best = 0
-        for i in range(1, cons.P):
-            if self.pop[s][i].fitness > self.pop[s][best].fitness:
-                best = i
-        return best
+    def get_best(self, s: int) -> Ind:
+        '''Returns the index of the best individual in the population.'''
+        return max(self.pop[s], key=attrgetter('fitness'))
 
-    def get_best_fit(self, s):
+    def get_best_fit(self, s: int) -> float:
         '''Returns the fitness of the best individual in a given species.'''
-        return self.pop[s][self.get_best(s)].fitness
+        return self.get_best(s).fitness
 
-    def get_avg_fit(self, s):
+    def get_avg_fit(self, s: int) -> float:
         '''Returns the average fitness of a given species.'''
-        total = 0
-        for i in range(cons.P):
-            total += self.pop[s][i].fitness
-        return total / cons.P
+        return np.mean([p.fitness for p in self.pop[s]])
 
-    def print_archive(self, s):
-        '''Prints the evaluated genes and fitnesses of a given species.'''
-        for i in range(len(self.archive_genes[s])):
-            for n in range(cons.N):
-                print(str(self.archive_genes[s][i][n]), end='')
-            print(',%.5f' % self.archive_fitness[s][i])
+    def print_archive(self, s: int) -> None:
+        '''Prints the archived individuals.'''
+        for p in self.archive[s]:
+            print(p.to_string())
 
-    def print_pop(self):
-        '''Prints the current population.'''
+    def print_pop(self) -> None:
+        '''Prints the current populations.'''
         for s in range(cons.S):
             print('Species %d' % s)
-            for p in range(cons.P):
-                print(self.pop[s][p].to_string())
+            for p in self.pop[s]:
+                print(p.to_string())
 
-    def run_ea(self, nkcs, evals, pbest, pavg):
+    def run_ea(self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray,
+            pavg: np.ndarray) -> None:
         '''Executes a standard EA - partnering with the best candidates.'''
         while self.evals < cons.MAX_EVALS:
             for s in range(cons.S):
-                parent1 = self.pop[s][self.tournament(s)]
-                parent2 = self.pop[s][self.tournament(s)]
-                child = self.create_offspring(parent1, parent2)
-                team = self.get_team_best(s, child)
-                self.eval_team(nkcs, team)
-                self.add_offspring(s, child)
+                parent1 = self.__tournament(s)
+                parent2 = self.__tournament(s)
+                child = self.__create_offspring(parent1, parent2)
+                team = self.__get_team_best(s, child)
+                self.__eval_team(nkcs, team)
+                self.__add_offspring(s, child)
                 self.update_perf(evals, pbest, pavg)
 
-    def run_sea(self, nkcs, evals, pbest, pavg):
+    def __create_candidates(self, s: int) -> np.ndarray:
+        '''Returns M offspring genomes generated by 2 parents.'''
+        p1: Ind = self.__tournament(s)
+        p2: Ind = self.__tournament(s)
+        return np.asarray([self.__create_offspring(p1, p2).genome for _ in range(cons.M)])
+
+    def run_sea(self, nkcs: NKCS, evals: np.ndarray,
+            pbest: np.ndarray, pavg: np.ndarray) -> None:
         '''Executes a surrogate-assisted EA.'''
         while self.evals < cons.MAX_EVALS:
             for s in range(cons.S):
+                X_train = np.asarray([p.genome for p in self.archive[s]])
+                y_train = np.asarray([p.fitness for p in self.archive[s]])
+                X_predict = self.__create_candidates(s)
                 model = surrogate.Model()
-                model.fit(self.archive_genes[s], self.archive_fitness[s])
-                # best of M offspring from 2 parents
-                parent1 = self.pop[s][self.tournament(s)]
-                parent2 = self.pop[s][self.tournament(s)]
-                candidates = []
-                for _ in range(cons.M):
-                    candidates.append(self.create_offspring(parent1, parent2).genome)
-                scores = model.predict(candidates)
+                model.fit(X_train, y_train)
+                scores = model.score(X_predict)
+                # evaluate single best candidate
                 child = Ind()
-                child.genome = candidates[np.argmax(scores)]
-                # evaluate offspring
-                team = self.get_team_best(s, child)
-                self.eval_team(nkcs, team)
-                self.add_offspring(s, child)
+                child.genome = np.copy(X_predict[np.argmax(scores)])
+                team = self.__get_team_best(s, child)
+                self.__eval_team(nkcs, team)
+                self.__add_offspring(s, child)
                 self.update_perf(evals, pbest, pavg)

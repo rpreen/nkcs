@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.8
 #
 # Copyright (C) 2019--2021 Richard Preen <rpreen@gmail.com>
 #
@@ -18,42 +18,44 @@
 
 '''An implementation of the NKCS model for exploring aspects of coevolution.'''
 
+from __future__ import annotations
 import sys
+from typing import List, Final, Dict
 import numpy as np
 from constants import Constants as cons
 
 class NKCS:
     '''NKCS model.'''
 
-    def __init__(self):
+    def __init__(self) -> None:
         '''Initialises a randomly generated NKCS model.'''
-        self.species = [self.Species(i) for i in range(cons.S)]
+        self.species: List[NKCS.Species] = [self.Species(i) for i in range(cons.S)]
 
-    def calc_fit(self, sp, team):
+    def __calc_fit(self, sp: int, team: List[np.ndarray]) -> float:
         '''Returns the fitness of an individual partnered with a given team.'''
-        total = 0
+        total: float = 0
         for i in range(cons.N):
-            inputs = self.get_gene_inputs(sp, team, i)
+            inputs = self.__get_gene_inputs(sp, team, i)
             total += self.species[sp].gene_fit(inputs, i)
         return total / cons.N
 
-    def calc_team_fit(self, team):
+    def calc_team_fit(self, team: List[np.ndarray]) -> float:
         '''Returns the total team fitness.'''
-        total = 0
+        total: float = 0
         for s in range(cons.S):
-            total += self.calc_fit(s, team)
+            total += self.__calc_fit(s, team)
         return total
 
-    def get_gene_inputs(self, sp, team, gene_idx):
+    def __get_gene_inputs(self, sp: int, team: List[np.ndarray], gene_idx: int) -> np.ndarray:
         '''Returns the inputs to a gene (including the internal state).'''
-        species = self.species[sp] # species containing the gene
-        inputs = [0 for i in range(species.n_gene_inputs)] # inputs to the gene
-        offset = gene_idx * (species.n_gene_inputs - 1) # map offset
-        cnt = 0
+        species: NKCS.Species = self.species[sp] # species containing the gene
+        inputs: np.ndarry = np.zeros(species.n_gene_inputs) # inputs to the gene
+        offset: int = gene_idx * (species.n_gene_inputs - 1) # map offset
+        cnt: int = 0
         # internal connections
         for _ in range(cons.K):
             node = species.map[offset + cnt]
-            inputs[cnt] = team[sp].genome[node]
+            inputs[cnt] = team[sp][node]
             cnt += 1
         # external connections
         if cons.NKCS_TOPOLOGY == 'line':
@@ -61,29 +63,29 @@ class NKCS:
                 left = cons.S - 1 if sp - 1 < 0 else sp - 1
                 for _ in range(cons.C):
                     node = species.map[offset + cnt]
-                    inputs[cnt] = team[left].genome[node]
+                    inputs[cnt] = team[left][node]
                     cnt += 1
             if sp != cons.S - 1:
                 right = (sp + 1) % cons.S
                 for _ in range(cons.C):
                     node = species.map[offset + cnt]
-                    inputs[cnt] = team[right].genome[node]
+                    inputs[cnt] = team[right][node]
                     cnt += 1
         elif cons.NKCS_TOPOLOGY == 'standard':
             for j in range(cons.S):
                 if j != sp:
                     for _ in range(cons.C):
                         node = species.map[offset + cnt]
-                        inputs[cnt] = team[j].genome[node]
+                        inputs[cnt] = team[j][node]
                         cnt += 1
         else:
             print('unsupported NKCS topology')
             sys.exit()
         # internal state
-        inputs[cnt] = team[sp].genome[gene_idx]
+        inputs[cnt] = team[sp][gene_idx]
         return inputs
 
-    def display(self, sp):
+    def display(self, sp: int) -> None:
         '''Prints a specified NKCS species.'''
         print('**********************')
         print('[%d] SPECIES:' % sp)
@@ -93,9 +95,9 @@ class NKCS:
     class Species:
         '''A species within an NKCS model.'''
 
-        def __init__(self, sp):
+        def __init__(self, sp: int) -> None:
             '''Initialises a species with random connectivity.'''
-            X = 0 #: number of coevolving species
+            X: int = 0 #: number of coevolving species
             if cons.S > 1:
                 if cons.NKCS_TOPOLOGY == 'line':
                     if sp in (0, cons.S - 1):
@@ -107,23 +109,25 @@ class NKCS:
                 else:
                     print('unsupported NKCS topology')
                     sys.exit()
-            self.n_gene_inputs = cons.K + (X * cons.C) + 1 #: n inputs to each gene
-            map_length = cons.N * (self.n_gene_inputs - 1) #: connectivity length
-            self.map = np.random.randint(0, cons.N, map_length) #: connectivity
-            self.ftable = [{} for i in range(cons.N)] #: each gene's hash table
+            self.n_gene_inputs: Final[int] = cons.K + (X * cons.C) + 1 #: n inputs to each gene
+            map_length: Final[int] = cons.N * (self.n_gene_inputs - 1) #: connectivity length
+            self.map: np.ndarray = np.random.randint(0, cons.N, map_length) #: connectivity
+            self.ftable: List[Dict[tuple, float]] = \
+                [{} for i in range(cons.N)] #: each gene's hash table
 
-        def gene_fit(self, inputs, gene):
+        def gene_fit(self, inputs: np.ndarray, gene: int) -> float:
             '''Returns the fitness of an individual gene within a species.'''
-            key = tuple(inputs)
             # find fitness in table
-            if key in self.ftable[gene]:
-                return self.ftable[gene].get(key)
-            # not found, add new
-            fitness = np.random.uniform(low=0, high=1)
-            self.ftable[gene][key] = fitness
+            key = tuple(inputs)
+            fit = self.ftable[gene].get(key)
+            if fit is None: # not found, add new
+                fitness = np.random.uniform(low=0, high=1)
+                self.ftable[gene][key] = fitness
+            else:
+                fitness = fit
             return fitness
 
-        def display(self):
+        def display(self) -> None:
             '''Prints an NKCS species.'''
             print('con: ' + str(self.map))
             print('fitness table:')
