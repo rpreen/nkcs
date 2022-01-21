@@ -1,6 +1,6 @@
-#!/usr/bin/python3.8
+#!/usr/bin/python3
 #
-# Copyright (C) 2019--2021 Richard Preen <rpreen@gmail.com>
+# Copyright (C) 2019--2022 Richard Preen <rpreen@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,71 +16,75 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-'''Evolutionary algorithms for NKCS.'''
+"""Evolutionary algorithms for NKCS."""
 
 from __future__ import annotations
+
 import random
-from typing import List, Final
 from copy import deepcopy
 from operator import attrgetter
+from typing import Final
+
 import numpy as np
+
 import surrogate
+from constants import Constants as Cons
 from nkcs import NKCS
-from constants import Constants as cons
+
 
 class Ind:
-    '''A binary NKCS individual within an evolutionary algorithm.'''
+    """A binary NKCS individual within an evolutionary algorithm."""
 
     def __init__(self) -> None:
-        '''Initialises a random individual.'''
-        self.fitness: float = 0 #: fitness
-        self.genome: np.ndarray = np.random.randint(2, size=cons.N) #: genome
+        """Initialises a random individual."""
+        self.fitness: float = 0  #: fitness
+        self.genome: np.ndarray = np.random.randint(2, size=Cons.N)  #: genome
 
     def to_string(self) -> str:
-        '''Returns a string representation of an individual.'''
-        return ','.join([str(gene) for gene in self.genome]) \
-            + ',%f' % (self.fitness)
+        """Returns a string representation of an individual."""
+        return ",".join([str(gene) for gene in self.genome]) + f",{self.fitness}"
 
     def mutate(self) -> None:
-        '''Mutates an individual.'''
+        """Mutates an individual."""
         for i in range(len(self.genome)):
-            if np.random.uniform(low=0, high=1) < cons.P_MUT:
+            if np.random.uniform(low=0, high=1) < Cons.P_MUT:
                 if self.genome[i] == 0:
                     self.genome[i] = 1
                 else:
                     self.genome[i] = 0
 
     def uniform_crossover(self, parent: Ind) -> None:
-        '''Performs uniform crossover.'''
+        """Performs uniform crossover."""
         for i in range(len(self.genome)):
             if np.random.uniform(low=0, high=1) < 0.5:
                 self.genome[i] = parent.genome[i]
 
+
 class EA:
-    '''NKCS evolutionary algorithm.'''
+    """NKCS evolutionary algorithm."""
 
     def __init__(self) -> None:
-        '''Initialises the evolutionary algorithm.'''
-        self.evals: int = 0 #: number of evaluations performed
-        self.archive: List[List[Ind]] = [[] for _ in range(cons.S)] #: archive
-        self.pop: List[List[Ind]] = [] #: current species populations
+        """Initialises the evolutionary algorithm."""
+        self.evals: int = 0  #: number of evaluations performed
+        self.archive: list[list[Ind]] = [[] for _ in range(Cons.S)]  #: archive
+        self.pop: list[list[Ind]] = []  #: current species populations
 
     def run_initial(self, nkcs: NKCS) -> None:
-        '''Generates new random initial populations.'''
+        """Generates new random initial populations."""
         # create the initial populations
-        for _ in range(cons.S):
-            species = [Ind() for _ in range(cons.P)]
+        for _ in range(Cons.S):
+            species = [Ind() for _ in range(Cons.P)]
             self.pop.append(species)
         # select random initial partners
-        rpartners: List[Ind] = []
-        team: List[Ind] = []
-        for s in range(cons.S):
-            r = self.pop[s][np.random.randint(0, cons.P)]
+        rpartners: list[Ind] = []
+        team: list[Ind] = []
+        for s in range(Cons.S):
+            r = self.pop[s][np.random.randint(0, Cons.P)]
             rpartners.append(r)
             team.append(r)
         # evaluate initial populations
-        for s in range(cons.S):
-            for p in range(cons.P):
+        for s in range(Cons.S):
+            for p in range(Cons.P):
                 team[s] = self.pop[s][p]
                 genomes = np.asarray([ind.genome for ind in team])
                 team[s].fitness = nkcs.calc_team_fit(genomes)
@@ -88,20 +92,19 @@ class EA:
                 self.evals += 1
             team[s] = rpartners[s]
 
-    def __eval_team(self, nkcs: NKCS, team: List[Ind]) -> None:
-        '''Evaluates a candidate team.
-        Assigns fitness to each individual if it's the best seen.'''
+    def __eval_team(self, nkcs: NKCS, team: list[Ind]) -> None:
+        """Evaluates a candidate team.
+        Assigns fitness to each individual if it's the best seen."""
         genomes = np.asarray([ind.genome for ind in team])
         team_fit: Final[float] = nkcs.calc_team_fit(genomes)
-        for s in range(cons.S):
-            if team[s].fitness < team_fit:
-                team[s].fitness = team_fit
-        self.evals += 1 # total team evals performed
+        for s in range(Cons.S):
+            team[s].fitness = max(team[s].fitness, team_fit)
+        self.evals += 1  # total team evals performed
 
-    def __get_team_best(self, s: int, child: Ind) -> List[Ind]:
-        '''Returns a team assembled with the best partners for a child.'''
-        team: List[Ind] = []
-        for sp in range(cons.S):
+    def __get_team_best(self, s: int, child: Ind) -> list[Ind]:
+        """Returns a team assembled with the best partners for a child."""
+        team: list[Ind] = []
+        for sp in range(Cons.S):
             if sp != s:
                 team.append(self.get_best(sp))
             else:
@@ -109,31 +112,33 @@ class EA:
         return team
 
     def __update_archive(self, s: int, p: Ind) -> None:
-        '''Adds an evaluated individual to the species archive.'''
+        """Adds an evaluated individual to the species archive."""
         self.archive[s].append(p)
-        if len(self.archive[s]) > cons.MAX_ARCHIVE:
+        if len(self.archive[s]) > Cons.MAX_ARCHIVE:
             self.archive[s].pop(0)
 
-    def update_perf(self, evals: List[int], perf_best: np.ndarray, perf_avg: np.ndarray):
-        '''Updates current performance tracking.'''
-        if self.evals % (cons.P * cons.S) == 0:
-            g: Final[int] = int((self.evals / (cons.P * cons.S)) - 1)
+    def update_perf(
+        self, evals: list[int], perf_best: np.ndarray, perf_avg: np.ndarray
+    ):
+        """Updates current performance tracking."""
+        if self.evals % (Cons.P * Cons.S) == 0:
+            g: Final[int] = int((self.evals / (Cons.P * Cons.S)) - 1)
             evals[g] = self.evals
-            perf_best[g] = np.max([self.get_best_fit(s) for s in range(cons.S)])
-            perf_avg[g] = np.mean([self.get_avg_fit(s) for s in range(cons.S)])
+            perf_best[g] = np.max([self.get_best_fit(s) for s in range(Cons.S)])
+            perf_avg[g] = np.mean([self.get_avg_fit(s) for s in range(Cons.S)])
 
     def __create_offspring(self, p1: Ind, p2: Ind) -> Ind:
-        '''Creates and returns a new offspring.'''
+        """Creates and returns a new offspring."""
         child = deepcopy(p1)
         child.fitness = 0
-        if np.random.uniform(low=0, high=1) < cons.P_CROSS:
+        if np.random.uniform(low=0, high=1) < Cons.P_CROSS:
             child.uniform_crossover(p2)
         child.mutate()
         return child
 
     def __add_offspring(self, s: int, child: Ind) -> None:
-        '''Adds an offspring to the population and archive.'''
-        if cons.REPLACE == 'tournament':
+        """Adds an offspring to the population and archive."""
+        if Cons.REPLACE == "tournament":
             self.pop[s].remove(self.__neg_tournament(s))
             self.pop[s].append(deepcopy(child))
         else:
@@ -144,48 +149,49 @@ class EA:
         self.__update_archive(s, child)
 
     def __tournament(self, s: int) -> Ind:
-        '''Returns a parent selected by tournament.'''
-        tournament = random.sample(self.pop[s], cons.T_SIZE)
-        return max(tournament, key=attrgetter('fitness'))
+        """Returns a parent selected by tournament."""
+        tournament = random.sample(self.pop[s], Cons.T_SIZE)
+        return max(tournament, key=attrgetter("fitness"))
 
     def __neg_tournament(self, s: int) -> Ind:
-        '''Returns an individual selected by negative tournament.'''
-        tournament = random.sample(self.pop[s], cons.T_SIZE)
-        return min(tournament, key=attrgetter('fitness'))
+        """Returns an individual selected by negative tournament."""
+        tournament = random.sample(self.pop[s], Cons.T_SIZE)
+        return min(tournament, key=attrgetter("fitness"))
 
     def get_worst(self, s: int) -> Ind:
-        '''Returns the index of the least fit individual in the population.'''
-        return min(self.pop[s], key=attrgetter('fitness'))
+        """Returns the index of the least fit individual in the population."""
+        return min(self.pop[s], key=attrgetter("fitness"))
 
     def get_best(self, s: int) -> Ind:
-        '''Returns the index of the best individual in the population.'''
-        return max(self.pop[s], key=attrgetter('fitness'))
+        """Returns the index of the best individual in the population."""
+        return max(self.pop[s], key=attrgetter("fitness"))
 
     def get_best_fit(self, s: int) -> float:
-        '''Returns the fitness of the best individual in a given species.'''
+        """Returns the fitness of the best individual in a given species."""
         return self.get_best(s).fitness
 
     def get_avg_fit(self, s: int) -> float:
-        '''Returns the average fitness of a given species.'''
+        """Returns the average fitness of a given species."""
         return np.mean([p.fitness for p in self.pop[s]])
 
     def print_archive(self, s: int) -> None:
-        '''Prints the archived individuals.'''
+        """Prints the archived individuals."""
         for p in self.archive[s]:
             print(p.to_string())
 
     def print_pop(self) -> None:
-        '''Prints the current populations.'''
-        for s in range(cons.S):
-            print('Species %d' % s)
+        """Prints the current populations."""
+        for s in range(Cons.S):
+            print(f"Species {s}")
             for p in self.pop[s]:
                 print(p.to_string())
 
-    def run_ea(self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray,
-            pavg: np.ndarray) -> None:
-        '''Executes a standard EA - partnering with the best candidates.'''
-        while self.evals < cons.MAX_EVALS:
-            for s in range(cons.S):
+    def run_ea(
+        self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray, pavg: np.ndarray
+    ) -> None:
+        """Executes a standard EA - partnering with the best candidates."""
+        while self.evals < Cons.MAX_EVALS:
+            for s in range(Cons.S):
                 parent1 = self.__tournament(s)
                 parent2 = self.__tournament(s)
                 child = self.__create_offspring(parent1, parent2)
@@ -195,16 +201,19 @@ class EA:
                 self.update_perf(evals, pbest, pavg)
 
     def __create_candidates(self, s: int) -> np.ndarray:
-        '''Returns M offspring genomes generated by 2 parents.'''
+        """Returns M offspring genomes generated by 2 parents."""
         p1: Ind = self.__tournament(s)
         p2: Ind = self.__tournament(s)
-        return np.asarray([self.__create_offspring(p1, p2).genome for _ in range(cons.M)])
+        return np.asarray(
+            [self.__create_offspring(p1, p2).genome for _ in range(Cons.M)]
+        )
 
-    def run_sea(self, nkcs: NKCS, evals: np.ndarray,
-            pbest: np.ndarray, pavg: np.ndarray) -> None:
-        '''Executes a surrogate-assisted EA.'''
-        while self.evals < cons.MAX_EVALS:
-            for s in range(cons.S):
+    def run_sea(
+        self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray, pavg: np.ndarray
+    ) -> None:
+        """Executes a surrogate-assisted EA."""
+        while self.evals < Cons.MAX_EVALS:
+            for s in range(Cons.S):
                 X_train = np.asarray([p.genome for p in self.archive[s]])
                 y_train = np.asarray([p.fitness for p in self.archive[s]])
                 X_predict = self.__create_candidates(s)

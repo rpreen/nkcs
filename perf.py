@@ -1,6 +1,6 @@
-#!/usr/bin/python3.8
+#!/usr/bin/python3
 #
-# Copyright (C) 2019--2021 Richard Preen <rpreen@gmail.com>
+# Copyright (C) 2019--2022 Richard Preen <rpreen@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,47 +16,51 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-'''Functions for reading and writing results to a file.'''
+"""Functions for reading and writing results to a file."""
 
-import os
 import csv
-from typing import Tuple, Final
-import numpy as np
-from constants import Constants as cons
-from constants import save_constants, read_constants
+import os
+from typing import Final, Tuple
 
-def save_data(filename: str, evals: np.ndarray, perf_best: np.ndarray,
-        perf_avg: np.ndarray) -> None:
-    '''Writes the results to a data file.'''
-    path: Final[str] = os.path.normpath('res/'+filename+'.dat')
-    fp = open(path, 'w')
-    save_constants(fp)
-    dim: Final[int] = cons.F * cons.E
-    for g in range(cons.G):
-        fp.write('%d' % (evals[0][g])) # evaluations
-        for r in range(dim): # best from each run
-            fp.write(',%f' % (perf_best[r][g]))
-        for r in range(dim): # average from each run
-            fp.write(',%f' % (perf_avg[r][g]))
-        fp.write('\n')
-    fp.close()
+import numpy as np
+
+from constants import Constants as Cons
+from constants import read_constants, save_constants
+
+
+def save_data(
+    filename: str, evals: np.ndarray, perf_best: np.ndarray, perf_avg: np.ndarray
+) -> None:
+    """Writes the results to a data file."""
+    path: Final[str] = os.path.normpath(f"res/{filename}.dat")
+    with open(path, "w", encoding="utf-8") as fp:
+        save_constants(fp)
+        dim: Final[int] = Cons.F * Cons.E
+        for g in range(Cons.G):
+            fp.write(f"{evals[0][g]}")  # evaluations
+            for r in range(dim):  # best from each run
+                fp.write(f",{perf_best[r][g]}")
+            for r in range(dim):  # average from each run
+                fp.write(f",{perf_avg[r][g]}")
+            fp.write("\n")
+
 
 def read_data(filename: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    '''Reads the results from a data file.'''
-    path: Final[str] = os.path.normpath('res/'+filename+'.dat')
-    with open(path, 'r') as csvfile:
-        archive = csv.reader(csvfile, delimiter=',')
+    """Reads the results from a data file."""
+    path: Final[str] = os.path.normpath(f"res/{filename}.dat")
+    with open(path, "r", encoding="utf-8") as csvfile:
+        archive = csv.reader(csvfile, delimiter=",")
         # read constants from the header row
         row = next(archive)
         read_constants(row)
         # data rows
-        n_res = cons.F * cons.E
-        evals = np.zeros(cons.G)
-        perf_best = np.zeros((n_res, cons.G))
-        perf_avg = np.zeros((n_res, cons.G))
+        n_res = Cons.F * Cons.E
+        evals = np.zeros(Cons.G)
+        perf_best = np.zeros((n_res, Cons.G))
+        perf_avg = np.zeros((n_res, Cons.G))
         g = 0
         for row in archive:
-            evals[g] = int(row[0])
+            evals[g] = int(float(row[0]))
             for col in range(n_res):
                 perf_best[col][g] = float(row[col + 1])
             for col in range(n_res):

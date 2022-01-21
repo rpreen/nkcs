@@ -1,6 +1,6 @@
-#!/usr/bin/python3.8
+#!/usr/bin/python3
 #
-# Copyright (C) 2019--2021 Richard Preen <rpreen@gmail.com>
+# Copyright (C) 2019--2022 Richard Preen <rpreen@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,89 +16,100 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-'''Main script for starting NKCS (co)evolutionary experiments.'''
+"""Main script for starting NKCS (co)evolutionary experiments."""
 
 from __future__ import annotations
+
 import os
 import sys
 import warnings
-from typing import List, Final
+from typing import Final
+
 import dill
 from tqdm import tqdm
-from constants import Constants as cons # parameters are in constants.py
+
+from constants import Constants as Cons  # parameters are in constants.py
 from constants import cons_to_string
 
 # set number of CPU threads
-os.environ['OMP_NUM_THREADS'] = str(cons.NUM_THREADS)
-os.environ['OPENBLAS_NUM_THREADS'] = str(cons.NUM_THREADS)
-os.environ['MKL_NUM_THREADS'] = str(cons.NUM_THREADS)
-os.environ['VECLIB_MAXIMUM_THREADS'] = str(cons.NUM_THREADS)
-os.environ['NUMEXPR_NUM_THREADS'] = str(cons.NUM_THREADS)
-warnings.filterwarnings('ignore') # surpress warnings
+os.environ["OMP_NUM_THREADS"] = str(Cons.NUM_THREADS)
+os.environ["OPENBLAS_NUM_THREADS"] = str(Cons.NUM_THREADS)
+os.environ["MKL_NUM_THREADS"] = str(Cons.NUM_THREADS)
+os.environ["VECLIB_MAXIMUM_THREADS"] = str(Cons.NUM_THREADS)
+os.environ["NUMEXPR_NUM_THREADS"] = str(Cons.NUM_THREADS)
+warnings.filterwarnings("ignore")  # suppress warnings
 
 import numpy as np
-from nkcs import NKCS
+
 from ea import EA
+from nkcs import NKCS
 from perf import save_data
 from plot import plot
 
-# results storage
-N_RES: Final[int] = cons.F * cons.E
-evals: np.ndarray = np.zeros((N_RES, cons.G))
-perf_best: np.ndarray = np.zeros((N_RES, cons.G))
-perf_avg: np.ndarray = np.zeros((N_RES, cons.G))
 
-r: int = 0 #: run counter
-nkcs: List[NKCS] = [] #: NKCS landscapes
-ea: List[EA] = [] #: EA populations
+def main() -> None:
+    """Main function."""
+    # results storage
+    n_res: Final[int] = Cons.F * Cons.E
+    evals: np.ndarray = np.zeros((n_res, Cons.G))
+    perf_best: np.ndarray = np.zeros((n_res, Cons.G))
+    perf_avg: np.ndarray = np.zeros((n_res, Cons.G))
 
-if cons.EXPERIMENT_LOAD: # reuse fitness landscapes and initial populations
-    with open('experiment.pkl', 'rb') as fp:
-        ea = dill.load(fp)
-        nkcs = dill.load(fp)
-    if len(nkcs) != cons.F or len(ea) != N_RES:
-        print('loaded experiment does not match constants')
-        sys.exit()
-    for _ in range(cons.F):
-        for _ in range(cons.E):
-            ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
+    r: int = 0  #: run counter
+    nkcs: list[NKCS] = []  #: NKCS landscapes
+    ea: list[EA] = []  #: EA populations
+
+    if Cons.EXPERIMENT_LOAD:  # reuse fitness landscapes and initial populations
+        with open("experiment.pkl", "rb") as fp:
+            ea = dill.load(fp)
+            nkcs = dill.load(fp)
+        if len(nkcs) != Cons.F or len(ea) != n_res:
+            print("loaded experiment does not match constants")
+            sys.exit()
+        for _ in range(Cons.F):
+            for _ in range(Cons.E):
+                ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
+                r += 1
+    else:  # create new fitness landscapes and initial populations
+        for f in range(Cons.F):
+            nkcs.append(NKCS())
+            for _ in range(Cons.E):
+                ea.append(EA())
+                ea[r].run_initial(nkcs[f])
+                ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
+                r += 1
+
+    if Cons.EXPERIMENT_SAVE:  # save initial populations
+        with open("experiment.pkl", "wb") as fp:
+            dill.dump(ea, fp)
+
+    # run the experiments
+    r = 0
+    bar = tqdm(total=n_res)  #: progress bar
+    for f in range(Cons.F):  # F NKCS functions
+        for e in range(Cons.E):  # E experiments
+            if Cons.ACQUISITION == "ea":
+                ea[r].run_ea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
+            else:
+                ea[r].run_sea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
+            best_fit: Final[float] = ea[r].get_best_fit(0)
+            status = f"nkcs {f} experiment {e} complete: {best_fit:.5f}"
             r += 1
-else: # create new fitness landscapes and initial populations
-    for f in range(cons.F):
-        nkcs.append(NKCS())
-        for _ in range(cons.E):
-            ea.append(EA())
-            ea[r].run_initial(nkcs[f])
-            ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
-            r += 1
+            bar.set_description(status)
+            bar.refresh()
+            bar.update(1)
+    bar.close()
 
-if cons.EXPERIMENT_SAVE: # save initial populations
-    with open('experiment.pkl', 'wb') as fp:
-        dill.dump(ea, fp)
+    if Cons.EXPERIMENT_SAVE:  # save fitness landscapes
+        with open("experiment.pkl", "a+b") as fp:
+            dill.dump(nkcs, fp)
 
-# run the experiments
-r = 0
-bar = tqdm(total=N_RES) #: progress bar
-for f in range(cons.F): # F NKCS functions
-    for e in range(cons.E): # E experiments
-        if cons.ACQUISITION == 'ea':
-            ea[r].run_ea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
-        else:
-            ea[r].run_sea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
-        status = ('nkcs (%d) experiment (%d) complete: (%.5f)' %
-            (f, e, ea[r].get_best_fit(0)))
-        r += 1
-        bar.set_description(status)
-        bar.refresh()
-        bar.update(1)
-bar.close()
+    # write performance to a file and plot results
+    filename: Final[str] = cons_to_string()
+    save_data(filename, evals, perf_best, perf_avg)
+    if Cons.PLOT:
+        plot([filename], filename)
 
-if cons.EXPERIMENT_SAVE: # save fitness landscapes
-    with open('experiment.pkl', 'a+b') as fp:
-        dill.dump(nkcs, fp)
 
-# write performance to a file and plot results
-FILENAME: Final[str] = cons_to_string()
-save_data(FILENAME, evals, perf_best, perf_avg)
-if cons.PLOT:
-    plot([FILENAME], FILENAME)
+if __name__ == "__main__":
+    main()

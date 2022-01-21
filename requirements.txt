@@ -1,7 +1,0 @@
-dill == 0.3.3
-joblib == 0.14.1
-matplotlib == 3.2.1
-numpy == 1.17.4
-scikit_learn == 0.22.2.post1
-scipy == 1.4.1
-tqdm == 4.45.0
