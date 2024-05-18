@@ -23,7 +23,6 @@ import os
 from typing import Final, Tuple
 
 import numpy as np
-
 from constants import Constants as Cons
 from constants import read_constants, save_constants
 

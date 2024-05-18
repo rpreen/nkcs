@@ -24,10 +24,9 @@ from typing import Final, List
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import stats
-
 from constants import Constants as Cons
 from perf import read_data
+from scipy import stats
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("plot")

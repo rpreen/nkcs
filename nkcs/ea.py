@@ -27,9 +27,9 @@ from operator import attrgetter
 from typing import Final
 
 import numpy as np
-
 import surrogate
 from constants import Constants as Cons
+
 from nkcs import NKCS
 
 logging.basicConfig(level=logging.INFO)
