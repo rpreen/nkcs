@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (C) 2019--2022 Richard Preen <rpreen@gmail.com>
+# Copyright (C) 2019--2024 Richard Preen <rpreen@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,9 +29,12 @@ from constants import read_constants, save_constants
 
 
 def save_data(
-    filename: str, evals: np.ndarray, perf_best: np.ndarray, perf_avg: np.ndarray
+    filename: str,
+    evals: np.ndarray,
+    perf_best: np.ndarray,
+    perf_avg: np.ndarray,
 ) -> None:
-    """Writes the results to a data file."""
+    """Write the results to a data file."""
     path: Final[str] = os.path.normpath(f"res/{filename}.dat")
     with open(path, "w", encoding="utf-8") as fp:
         save_constants(fp)
@@ -46,7 +49,7 @@ def save_data(
 
 
 def read_data(filename: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Reads the results from a data file."""
+    """Read the results from a data file."""
     path: Final[str] = os.path.normpath(f"res/{filename}.dat")
     with open(path, "r", encoding="utf-8") as csvfile:
         archive = csv.reader(csvfile, delimiter=",")
@@ -58,12 +61,10 @@ def read_data(filename: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         evals = np.zeros(Cons.G)
         perf_best = np.zeros((n_res, Cons.G))
         perf_avg = np.zeros((n_res, Cons.G))
-        g = 0
-        for row in archive:
+        for g, row in enumerate(archive):
             evals[g] = int(float(row[0]))
             for col in range(n_res):
                 perf_best[col][g] = float(row[col + 1])
             for col in range(n_res):
                 perf_avg[col][g] = float(row[n_res + col + 1])
-            g += 1
     return evals, perf_best, perf_avg

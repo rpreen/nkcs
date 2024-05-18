@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (C) 2019--2022 Richard Preen <rpreen@gmail.com>
+# Copyright (C) 2019--2024 Richard Preen <rpreen@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 """Plots experimental results."""
 
+import logging
 import os
 from typing import Final, List
 
@@ -27,6 +28,9 @@ from scipy import stats
 
 from constants import Constants as Cons
 from perf import read_data
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("plot")
 
 FILE_LIST: List[str] = []  # add data file names here (without .dat)
 
@@ -42,12 +46,15 @@ NUM_COLORS: Final[int] = 10  #: number of line colours
 
 if USE_TEX:
     plt.rc("font", **{"family": "serif", "serif": ["Palatino"]})
-    params = {"text.usetex": True, "text.latex.preamble": r"\usepackage{amstext}"}
+    params = {
+        "text.usetex": True,
+        "text.latex.preamble": r"\usepackage{amstext}",
+    }
     plt.rcParams.update(params)
 
 
 def get_title() -> str:
-    """Returns the title."""
+    """Return the title."""
     if USE_TEX:
         title = f"$N$={Cons.N} $K$={Cons.K}"
         if Cons.S > 1:
@@ -60,7 +67,7 @@ def get_title() -> str:
 
 
 def get_label(text: str) -> str:
-    """Returns the plot label."""
+    """Return the plot label."""
     label = Cons.ACQUISITION.upper()
     if Cons.ACQUISITION != "ea":
         label += "-" + Cons.MODEL.upper()
@@ -69,7 +76,7 @@ def get_label(text: str) -> str:
 
 
 def plot(filenames: List[str], plotname: str) -> None:
-    """Plots performance from multiple sets of runs."""
+    """Plot performance from multiple sets of runs."""
     fig = plt.figure(figsize=(6, 3))
     ax = fig.add_subplot(1, 1, 1)
     cm = plt.get_cmap("tab10")
@@ -111,7 +118,6 @@ def plot(filenames: List[str], plotname: str) -> None:
                 alpha=ALPHA,
             )
     ax.grid(linestyle="dotted", linewidth=1)
-    # ax.set_ylim([3.2, 4.2])
     ax.set_xlim(xmin=0)
     ax.legend(loc="best", prop={"size": 10})
     plt.title(get_title(), fontsize=14)
@@ -122,8 +128,8 @@ def plot(filenames: List[str], plotname: str) -> None:
 
 
 def stat_summary(name: str, array: np.ndarray) -> None:
-    """Prints descriptive statistics summary of an array."""
-    print(
+    """Print descriptive statistics summary of an array."""
+    logger.info(
         f"{name}: "
         f"MEAN={np.mean(array, axis=0)},"
         f"SD={np.std(array, axis=0)},"
@@ -135,7 +141,7 @@ def stat_summary(name: str, array: np.ndarray) -> None:
 
 
 def stat(filename1: str, filename2: str, generation: int) -> None:
-    """Compares the best individuals at a specified generation."""
+    """Compare the best individuals at a specified generation."""
     _, perf_best1, _ = read_data(filename1)
     _, perf_best2, _ = read_data(filename2)
     a: np.ndarray = perf_best1[:, generation]
@@ -143,7 +149,7 @@ def stat(filename1: str, filename2: str, generation: int) -> None:
     stat_summary("A", a)
     stat_summary("B", b)
     (s, p) = stats.ranksums(a, b)
-    print(f"Wilcoxon rank-sums: A vs. B: stat = {s:.5f}, p <= {p:.5f}\n")
+    logger.info(f"Wilcoxon rank-sums: A vs. B: stat = {s:.5f}, p <= {p:.5f}\n")
 
 
 # plots all experiments if this script is executed

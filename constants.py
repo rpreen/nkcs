@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (C) 2019--2022 Richard Preen <rpreen@gmail.com>
+# Copyright (C) 2019--2024 Richard Preen <rpreen@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,36 +24,34 @@ from typing import List, TextIO
 class Constants:
     """Global constants."""
 
-    F: int = 10  #: number of different NKCS experiments to run
-    E: int = 10  #: number of experiments per NKCS to run
-    G: int = 10  #: number of generations to run genetic algorithm
-    N: int = 20  #: number of genes (nodes/characteristics)
-    K: int = 2  #: number of connections to other (internal) genes
-    C: int = 2  #: number of external genes affecting each gene
-    S: int = 2  #: number of species
-    P: int = 20  #: number of individuals in each species population
-    T_SIZE: int = 3  #: size of selection and replacement tournament
-    P_MUT: float = 1 / N  #: per gene probability of mutation
-    P_CROSS: float = 0.8  #: probability of performing crossover
-    REPLACE: str = "worst"  #: replace = {"worst", "tournament"}
-    M: int = 1000  #: number of children per parent to test via model
+    F: int = 10  # number of different NKCS experiments to run
+    E: int = 10  # number of experiments per NKCS to run
+    G: int = 10  # number of generations to run genetic algorithm
+    N: int = 20  # number of genes (nodes/characteristics)
+    K: int = 2  # number of connections to other (internal) genes
+    C: int = 2  # number of external genes affecting each gene
+    S: int = 2  # number of species
+    P: int = 20  # number of individuals in each species population
+    T_SIZE: int = 3  # size of selection and replacement tournament
+    P_MUT: float = 1 / N  # per gene probability of mutation
+    P_CROSS: float = 0.8  # probability of performing crossover
+    REPLACE: str = "worst"  # replace = {"worst", "tournament"}
+    M: int = 1000  # number of children per parent to test via model
     MAX_ARCHIVE: int = 5000  #: max evaluated individuals for model training
-    H: int = 20  #: number of hidden neurons for MLP
-    N_MODELS: int = 10  #: number of surrogate models (for averaging, and std dev)
-    PLOT: bool = True  #: plot graph
-    ACQUISITION: str = "ea"  #: acquisition = {"ea", "ei", "uc", "pi", "mean"}
-    MODEL: str = (
-        "gp"  #: surrogate model = {"gp", "mlp", "svr", "linear", "tree", "gradient"}
-    )
+    H: int = 20  # number of hidden neurons for MLP
+    N_MODELS: int = 10  # num surrogate models (for averaging, and std dev)
+    PLOT: bool = True  # plot graph
+    ACQUISITION: str = "ea"  # acquisition = {"ea", "ei", "uc", "pi", "mean"}
+    MODEL: str = "gp"  #  {"gp", "mlp", "svr", "linear", "tree", "gradient"}
     MAX_EVALS: int = P * S * G  #: number of evaluations per experiment
-    NKCS_TOPOLOGY: str = "standard"  #: topology = {"line", "standard"}
-    NUM_THREADS: int = 8  #: number of CPU threads for model building
-    EXPERIMENT_SAVE: bool = False  #: whether to save landscapes and initial populations
-    EXPERIMENT_LOAD: bool = False  #: whether to load landscapes and initial populations
+    NKCS_TOPOLOGY: str = "standard"  # topology = {"line", "standard"}
+    NUM_THREADS: int = 8  # number of CPU threads for model building
+    EXPERIMENT_SAVE: bool = False  # whether to save landscapes and populations
+    EXPERIMENT_LOAD: bool = False  # whether to load landscapes and populations
 
 
 def cons_to_string() -> str:
-    """Returns a string representation of the constants."""
+    """Return a string representation of the constants."""
     string: str = (
         f"{Constants.NKCS_TOPOLOGY}"
         f"_f{Constants.F}"
@@ -82,7 +80,7 @@ def cons_to_string() -> str:
 
 
 def save_constants(fp: TextIO) -> None:
-    """Writes constants to a data file."""
+    """Write constants to a data file."""
     fp.write(f"{Constants.ACQUISITION},")
     fp.write(f"{Constants.F},")
     fp.write(f"{Constants.E},")
@@ -106,7 +104,7 @@ def save_constants(fp: TextIO) -> None:
 
 
 def read_constants(row: List[str]) -> None:
-    """Reads constants from a row."""
+    """Read constants from a row."""
     Constants.ACQUISITION = str(row[0])
     Constants.F = int(row[1])
     Constants.E = int(row[2])

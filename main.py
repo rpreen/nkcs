@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (C) 2019--2022 Richard Preen <rpreen@gmail.com>
+# Copyright (C) 2019--2024 Richard Preen <rpreen@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,52 +20,38 @@
 
 from __future__ import annotations
 
-import os
-import sys
-import warnings
 from typing import Final
 
 import dill
+import numpy as np
 from tqdm import tqdm
 
 from constants import Constants as Cons  # parameters are in constants.py
 from constants import cons_to_string
-
-# set number of CPU threads
-os.environ["OMP_NUM_THREADS"] = str(Cons.NUM_THREADS)
-os.environ["OPENBLAS_NUM_THREADS"] = str(Cons.NUM_THREADS)
-os.environ["MKL_NUM_THREADS"] = str(Cons.NUM_THREADS)
-os.environ["VECLIB_MAXIMUM_THREADS"] = str(Cons.NUM_THREADS)
-os.environ["NUMEXPR_NUM_THREADS"] = str(Cons.NUM_THREADS)
-warnings.filterwarnings("ignore")  # suppress warnings
-
-import numpy as np
-
 from ea import EA
 from nkcs import NKCS
 from perf import save_data
 from plot import plot
 
+if __name__ == "__main__":
+    """Run experiment.."""
 
-def main() -> None:
-    """Main function."""
     # results storage
     n_res: Final[int] = Cons.F * Cons.E
     evals: np.ndarray = np.zeros((n_res, Cons.G))
     perf_best: np.ndarray = np.zeros((n_res, Cons.G))
     perf_avg: np.ndarray = np.zeros((n_res, Cons.G))
 
-    r: int = 0  #: run counter
-    nkcs: list[NKCS] = []  #: NKCS landscapes
-    ea: list[EA] = []  #: EA populations
+    r: int = 0  # run counter
+    nkcs: list[NKCS] = []  # NKCS landscapes
+    ea: list[EA] = []  # EA populations
 
     if Cons.EXPERIMENT_LOAD:  # reuse fitness landscapes and initial populations
         with open("experiment.pkl", "rb") as fp:
             ea = dill.load(fp)
             nkcs = dill.load(fp)
         if len(nkcs) != Cons.F or len(ea) != n_res:
-            print("loaded experiment does not match constants")
-            sys.exit()
+            raise Exception("loaded experiment does not match constants")
         for _ in range(Cons.F):
             for _ in range(Cons.E):
                 ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
@@ -85,7 +71,7 @@ def main() -> None:
 
     # run the experiments
     r = 0
-    bar = tqdm(total=n_res)  #: progress bar
+    bar = tqdm(total=n_res)  # progress bar
     for f in range(Cons.F):  # F NKCS functions
         for e in range(Cons.E):  # E experiments
             if Cons.ACQUISITION == "ea":
@@ -109,7 +95,3 @@ def main() -> None:
     save_data(filename, evals, perf_best, perf_avg)
     if Cons.PLOT:
         plot([filename], filename)
-
-
-if __name__ == "__main__":
-    main()
