@@ -78,7 +78,7 @@ if __name__ == "__main__":
                 ea[r].run_ea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
             else:
                 ea[r].run_sea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
-            best_fit: Final[float] = ea[r].get_best_fit(0)
+            best_fit: float = ea[r].get_best_fit(0)
             status = f"nkcs {f} experiment {e} complete: {best_fit:.5f}"
             r += 1
             bar.set_description(status)

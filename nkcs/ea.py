@@ -92,7 +92,7 @@ class EA:
         for s in range(Cons.S):
             for p in range(Cons.P):
                 team[s] = self.pop[s][p]
-                genomes = np.asarray([ind.genome for ind in team])
+                genomes = [ind.genome for ind in team]
                 team[s].fitness = nkcs.calc_team_fit(genomes)
                 self.__update_archive(s, team[s])
                 self.evals += 1
@@ -103,7 +103,7 @@ class EA:
 
         Assign fitness to each individual if it's the best seen.
         """
-        genomes = np.asarray([ind.genome for ind in team])
+        genomes = [ind.genome for ind in team]
         team_fit: Final[float] = nkcs.calc_team_fit(genomes)
         for s in range(Cons.S):
             team[s].fitness = max(team[s].fitness, team_fit)
@@ -126,7 +126,7 @@ class EA:
             self.archive[s].pop(0)
 
     def update_perf(
-        self, evals: list[int], perf_best: np.ndarray, perf_avg: np.ndarray
+        self, evals: np.ndarray, perf_best: np.ndarray, perf_avg: np.ndarray
     ) -> None:
         """Update current performance tracking."""
         if self.evals % (Cons.P * Cons.S) == 0:
@@ -180,7 +180,9 @@ class EA:
 
     def get_avg_fit(self, s: int) -> float:
         """Return the average fitness of a given species."""
-        return np.mean([p.fitness for p in self.pop[s]])
+        fitnesses: list[float] = [p.fitness for p in self.pop[s]]
+        mean = np.mean(fitnesses)
+        return float(mean)
 
     def print_archive(self, s: int) -> None:
         """Print the archived individuals."""

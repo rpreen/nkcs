@@ -90,7 +90,7 @@ def model_mlp(seed: Optional[int]) -> MLPRegressor:
 
 
 def fit_model(
-    x: np.ndarray, y: np.ndarray, seed: int = None
+    x: np.ndarray, y: np.ndarray, seed: int | None = None
 ) -> Union[GaussianProcessRegressor, MLPRegressor]:
     """Train a surrogate model."""
     if Cons.MODEL == "gp":
