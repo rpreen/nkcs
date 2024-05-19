@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-"""Main script for starting NKCS (co)evolutionary experiments."""
+"""Main script for starting NKCS coevolutionary experiments."""
 
 from __future__ import annotations
 
@@ -34,8 +34,6 @@ from .perf import save_data
 from .plot import plot
 
 if __name__ == "__main__":
-    """Run experiment.."""
-
     # results storage
     n_res: Final[int] = Cons.F * Cons.E
     evals: np.ndarray = np.zeros((n_res, Cons.G))

@@ -52,12 +52,9 @@ class Ind:
 
     def mutate(self) -> None:
         """Mutate an individual."""
-        for i in range(len(self.genome)):
+        for i, gene in enumerate(self.genome):
             if np.random.uniform(low=0, high=1) < Cons.P_MUT:
-                if self.genome[i] == 0:
-                    self.genome[i] = 1
-                else:
-                    self.genome[i] = 0
+                self.genome[i] = 1 if gene == 0 else 1
 
     def uniform_crossover(self, parent: Ind) -> None:
         """Perform uniform crossover."""
@@ -192,9 +189,9 @@ class EA:
     def print_pop(self) -> None:
         """Print the current populations."""
         for s in range(Cons.S):
-            logger.info(f"Species {s}")
+            logger.info("Species %d", s)
             for p in self.pop[s]:
-                logger.info(p.to_string())
+                logger.info("%s", p.to_string())
 
     def run_ea(
         self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray, pavg: np.ndarray

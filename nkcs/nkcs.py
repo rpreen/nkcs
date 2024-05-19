@@ -167,6 +167,6 @@ class NKCS:
             """Print an NKCS species."""
             logger.info(f"con: {self.map}")
             logger.info("fitness table:")
-            for i in range(len(self.ftable)):
+            for i, fitness in enumerate(self.ftable):
                 logger.info(f"Gene {i}")
-                logger.info(self.ftable[i])
+                logger.info(fitness)
