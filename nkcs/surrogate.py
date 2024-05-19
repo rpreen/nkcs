@@ -21,13 +21,14 @@
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
-from constants import Constants as Cons
 from joblib import Parallel, delayed
 from scipy.stats import norm
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler
+
+from .constants import Constants as Cons
 
 np.set_printoptions(suppress=True)
 

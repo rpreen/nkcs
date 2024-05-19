@@ -24,7 +24,8 @@ import logging
 from typing import Final
 
 import numpy as np
-from constants import Constants as Cons
+
+from .constants import Constants as Cons
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("nkcs")

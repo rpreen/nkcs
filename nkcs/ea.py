@@ -27,10 +27,10 @@ from operator import attrgetter
 from typing import Final
 
 import numpy as np
-import surrogate
-from constants import Constants as Cons
 
-from nkcs import NKCS
+from .constants import Constants as Cons
+from .nkcs import NKCS
+from .surrogate import Model
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ea")
@@ -225,7 +225,7 @@ class EA:
                 X_train = np.asarray([p.genome for p in self.archive[s]])
                 y_train = np.asarray([p.fitness for p in self.archive[s]])
                 X_predict = self.__create_candidates(s)
-                model = surrogate.Model()
+                model = Model()
                 model.fit(X_train, y_train)
                 scores = model.score(X_predict)
                 # evaluate single best candidate

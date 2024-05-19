@@ -24,14 +24,14 @@ from typing import Final
 
 import dill
 import numpy as np
-from constants import Constants as Cons  # parameters are in constants.py
-from constants import cons_to_string
-from ea import EA
-from perf import save_data
-from plot import plot
 from tqdm import tqdm
 
-from nkcs import NKCS
+from .constants import Constants as Cons  # parameters are in constants.py
+from .constants import cons_to_string
+from .ea import EA
+from .nkcs import NKCS
+from .perf import save_data
+from .plot import plot
 
 if __name__ == "__main__":
     """Run experiment.."""
