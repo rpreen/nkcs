@@ -17,3 +17,7 @@ To run and generate results in the `res` folder:
 ```
 $ python3 -m nkcs.main
 ```
+
+## Documentation
+
+https://rpreen.github.io/nkcs/
