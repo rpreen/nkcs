@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>nkcs.main API documentation</title>
-<meta name="description" content="Main script for starting NKCS coevolutionary experiments." />
+<title>nkcs API documentation</title>
+<meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,112 +19,42 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>nkcs.main</code></h1>
+<h1 class="title">Package <code>nkcs</code></h1>
 </header>
 <section id="section-intro">
-<p>Main script for starting NKCS coevolutionary experiments.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">#!/usr/bin/python3
-#
-# Copyright (C) 2019--2024 Richard Preen &lt;rpreen@gmail.com&gt;
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
-#
-
-&#34;&#34;&#34;Main script for starting NKCS coevolutionary experiments.&#34;&#34;&#34;
-
-from __future__ import annotations
-
-from typing import Final
-
-import dill
-import numpy as np
-from tqdm import tqdm
-
-from .constants import Constants as Cons  # parameters are in constants.py
-from .constants import cons_to_string
-from .ea import EA
-from .nkcs import NKCS
-from .perf import save_data
-from .plot import plot
-
-if __name__ == &#34;__main__&#34;:
-    # results storage
-    n_res: Final[int] = Cons.F * Cons.E
-    evals: np.ndarray = np.zeros((n_res, Cons.G))
-    perf_best: np.ndarray = np.zeros((n_res, Cons.G))
-    perf_avg: np.ndarray = np.zeros((n_res, Cons.G))
-
-    r: int = 0  # run counter
-    nkcs: list[NKCS] = []  # NKCS landscapes
-    ea: list[EA] = []  # EA populations
-
-    if Cons.EXPERIMENT_LOAD:  # reuse fitness landscapes and initial populations
-        with open(&#34;experiment.pkl&#34;, &#34;rb&#34;) as fp:
-            ea = dill.load(fp)
-            nkcs = dill.load(fp)
-        if len(nkcs) != Cons.F or len(ea) != n_res:
-            raise Exception(&#34;loaded experiment does not match constants&#34;)
-        for _ in range(Cons.F):
-            for _ in range(Cons.E):
-                ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
-                r += 1
-    else:  # create new fitness landscapes and initial populations
-        for f in range(Cons.F):
-            nkcs.append(NKCS())
-            for _ in range(Cons.E):
-                ea.append(EA())
-                ea[r].run_initial(nkcs[f])
-                ea[r].update_perf(evals[r], perf_best[r], perf_avg[r])
-                r += 1
-
-    if Cons.EXPERIMENT_SAVE:  # save initial populations
-        with open(&#34;experiment.pkl&#34;, &#34;wb&#34;) as fp:
-            dill.dump(ea, fp)
-
-    # run the experiments
-    r = 0
-    bar = tqdm(total=n_res)  # progress bar
-    for f in range(Cons.F):  # F NKCS functions
-        for e in range(Cons.E):  # E experiments
-            if Cons.ACQUISITION == &#34;ea&#34;:
-                ea[r].run_ea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
-            else:
-                ea[r].run_sea(nkcs[f], evals[r], perf_best[r], perf_avg[r])
-            best_fit: float = ea[r].get_best_fit(0)
-            status = f&#34;nkcs {f} experiment {e} complete: {best_fit:.5f}&#34;
-            r += 1
-            bar.set_description(status)
-            bar.refresh()
-            bar.update(1)
-    bar.close()
-
-    if Cons.EXPERIMENT_SAVE:  # save fitness landscapes
-        with open(&#34;experiment.pkl&#34;, &#34;a+b&#34;) as fp:
-            dill.dump(nkcs, fp)
-
-    # write performance to a file and plot results
-    filename: Final[str] = cons_to_string()
-    save_data(filename, evals, perf_best, perf_avg)
-    if Cons.PLOT:
-        plot([filename], filename)</code></pre>
-</details>
 </section>
 <section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="nkcs.constants" href="constants.html">nkcs.constants</a></code></dt>
+<dd>
+<div class="desc"><p>Parameters for NKCS coevolutionary experimentation.</p></div>
+</dd>
+<dt><code class="name"><a title="nkcs.ea" href="ea.html">nkcs.ea</a></code></dt>
+<dd>
+<div class="desc"><p>Evolutionary algorithms for NKCS.</p></div>
+</dd>
+<dt><code class="name"><a title="nkcs.main" href="main.html">nkcs.main</a></code></dt>
+<dd>
+<div class="desc"><p>Main script for starting NKCS coevolutionary experiments.</p></div>
+</dd>
+<dt><code class="name"><a title="nkcs.nkcs" href="nkcs.html">nkcs.nkcs</a></code></dt>
+<dd>
+<div class="desc"><p>An implementation of the NKCS model for exploring aspects of coevolution.</p></div>
+</dd>
+<dt><code class="name"><a title="nkcs.perf" href="perf.html">nkcs.perf</a></code></dt>
+<dd>
+<div class="desc"><p>Functions for reading and writing results to a file.</p></div>
+</dd>
+<dt><code class="name"><a title="nkcs.plot" href="plot.html">nkcs.plot</a></code></dt>
+<dd>
+<div class="desc"><p>Plots experimental results.</p></div>
+</dd>
+<dt><code class="name"><a title="nkcs.surrogate" href="surrogate.html">nkcs.surrogate</a></code></dt>
+<dd>
+<div class="desc"><p>Models for surrogate-assisted evolution.</p></div>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -139,9 +69,15 @@ if __name__ == &#34;__main__&#34;:
 <ul></ul>
 </div>
 <ul id="index">
-<li><h3>Super-module</h3>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="nkcs" href="index.html">nkcs</a></code></li>
+<li><code><a title="nkcs.constants" href="constants.html">nkcs.constants</a></code></li>
+<li><code><a title="nkcs.ea" href="ea.html">nkcs.ea</a></code></li>
+<li><code><a title="nkcs.main" href="main.html">nkcs.main</a></code></li>
+<li><code><a title="nkcs.nkcs" href="nkcs.html">nkcs.nkcs</a></code></li>
+<li><code><a title="nkcs.perf" href="perf.html">nkcs.perf</a></code></li>
+<li><code><a title="nkcs.plot" href="plot.html">nkcs.plot</a></code></li>
+<li><code><a title="nkcs.surrogate" href="surrogate.html">nkcs.surrogate</a></code></li>
 </ul>
 </li>
 </ul>
