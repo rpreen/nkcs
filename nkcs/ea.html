@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>nkcs.ea API documentation</title>
+<meta name="description" content="Evolutionary algorithms for NKCS." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>nkcs.ea</code></h1>
+</header>
+<section id="section-intro">
+<p>Evolutionary algorithms for NKCS.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/python3
+#
+# Copyright (C) 2019--2024 Richard Preen &lt;rpreen@gmail.com&gt;
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+#
+
+&#34;&#34;&#34;Evolutionary algorithms for NKCS.&#34;&#34;&#34;
+
+from __future__ import annotations
+
+import logging
+import random
+from copy import deepcopy
+from operator import attrgetter
+from typing import Final
+
+import numpy as np
+
+from .constants import Constants as Cons
+from .nkcs import NKCS
+from .surrogate import Model
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(&#34;ea&#34;)
+
+
+class Ind:
+    &#34;&#34;&#34;A binary NKCS individual within an evolutionary algorithm.&#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
+        &#34;&#34;&#34;Initialise a random individual.&#34;&#34;&#34;
+        self.fitness: float = 0  #: fitness
+        self.genome: np.ndarray = np.random.randint(2, size=Cons.N)  #: genome
+
+    def to_string(self) -&gt; str:
+        &#34;&#34;&#34;Return a string representation of an individual.&#34;&#34;&#34;
+        return (
+            &#34;,&#34;.join([str(gene) for gene in self.genome]) + f&#34;,{self.fitness}&#34;
+        )
+
+    def mutate(self) -&gt; None:
+        &#34;&#34;&#34;Mutate an individual.&#34;&#34;&#34;
+        for i, gene in enumerate(self.genome):
+            if np.random.uniform(low=0, high=1) &lt; Cons.P_MUT:
+                self.genome[i] = 1 if gene == 0 else 1
+
+    def uniform_crossover(self, parent: Ind) -&gt; None:
+        &#34;&#34;&#34;Perform uniform crossover.&#34;&#34;&#34;
+        for i in range(len(self.genome)):
+            if np.random.randint(2):
+                self.genome[i] = parent.genome[i]
+
+
+class EA:
+    &#34;&#34;&#34;NKCS evolutionary algorithm.&#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
+        &#34;&#34;&#34;Initialise the evolutionary algorithm.&#34;&#34;&#34;
+        self.evals: int = 0  #: number of evaluations performed
+        self.archive: list[list[Ind]] = [[] for _ in range(Cons.S)]  #: archive
+        self.pop: list[list[Ind]] = []  #: current species populations
+
+    def run_initial(self, nkcs: NKCS) -&gt; None:
+        &#34;&#34;&#34;Generate new random initial populations.&#34;&#34;&#34;
+        # create the initial populations
+        for _ in range(Cons.S):
+            species = [Ind() for _ in range(Cons.P)]
+            self.pop.append(species)
+        # select random initial partners
+        rpartners: list[Ind] = []
+        team: list[Ind] = []
+        for s in range(Cons.S):
+            r = self.pop[s][np.random.randint(0, Cons.P)]
+            rpartners.append(r)
+            team.append(r)
+        # evaluate initial populations
+        for s in range(Cons.S):
+            for p in range(Cons.P):
+                team[s] = self.pop[s][p]
+                genomes = [ind.genome for ind in team]
+                team[s].fitness = nkcs.calc_team_fit(genomes)
+                self.__update_archive(s, team[s])
+                self.evals += 1
+            team[s] = rpartners[s]
+
+    def __eval_team(self, nkcs: NKCS, team: list[Ind]) -&gt; None:
+        &#34;&#34;&#34;Evaluate a candidate team.
+
+        Assign fitness to each individual if it&#39;s the best seen.
+        &#34;&#34;&#34;
+        genomes = [ind.genome for ind in team]
+        team_fit: Final[float] = nkcs.calc_team_fit(genomes)
+        for s in range(Cons.S):
+            team[s].fitness = max(team[s].fitness, team_fit)
+        self.evals += 1  # total team evals performed
+
+    def __get_team_best(self, s: int, child: Ind) -&gt; list[Ind]:
+        &#34;&#34;&#34;Return a team assembled with the best partners for a child.&#34;&#34;&#34;
+        team: list[Ind] = []
+        for sp in range(Cons.S):
+            if sp != s:
+                team.append(self.get_best(sp))
+            else:
+                team.append(child)
+        return team
+
+    def __update_archive(self, s: int, p: Ind) -&gt; None:
+        &#34;&#34;&#34;Add an evaluated individual to the species archive.&#34;&#34;&#34;
+        self.archive[s].append(p)
+        if len(self.archive[s]) &gt; Cons.MAX_ARCHIVE:
+            self.archive[s].pop(0)
+
+    def update_perf(
+        self, evals: np.ndarray, perf_best: np.ndarray, perf_avg: np.ndarray
+    ) -&gt; None:
+        &#34;&#34;&#34;Update current performance tracking.&#34;&#34;&#34;
+        if self.evals % (Cons.P * Cons.S) == 0:
+            g: Final[int] = int((self.evals / (Cons.P * Cons.S)) - 1)
+            evals[g] = self.evals
+            perf_best[g] = np.max([self.get_best_fit(s) for s in range(Cons.S)])
+            perf_avg[g] = np.mean([self.get_avg_fit(s) for s in range(Cons.S)])
+
+    def __create_offspring(self, p1: Ind, p2: Ind) -&gt; Ind:
+        &#34;&#34;&#34;Create and returns a new offspring.&#34;&#34;&#34;
+        child = deepcopy(p1)
+        child.fitness = 0
+        if np.random.uniform(low=0, high=1) &lt; Cons.P_CROSS:
+            child.uniform_crossover(p2)
+        child.mutate()
+        return child
+
+    def __add_offspring(self, s: int, child: Ind) -&gt; None:
+        &#34;&#34;&#34;Add an offspring to the population and archive.&#34;&#34;&#34;
+        if Cons.REPLACE == &#34;tournament&#34;:
+            self.pop[s].remove(self.__neg_tournament(s))
+            self.pop[s].append(deepcopy(child))
+        else:
+            worst = self.get_worst(s)
+            if worst.fitness &lt; child.fitness:
+                self.pop[s].remove(worst)
+                self.pop[s].append(deepcopy(child))
+        self.__update_archive(s, child)
+
+    def __tournament(self, s: int) -&gt; Ind:
+        &#34;&#34;&#34;Return a parent selected by tournament.&#34;&#34;&#34;
+        tournament = random.sample(self.pop[s], Cons.T_SIZE)
+        return max(tournament, key=attrgetter(&#34;fitness&#34;))
+
+    def __neg_tournament(self, s: int) -&gt; Ind:
+        &#34;&#34;&#34;Return an individual selected by negative tournament.&#34;&#34;&#34;
+        tournament = random.sample(self.pop[s], Cons.T_SIZE)
+        return min(tournament, key=attrgetter(&#34;fitness&#34;))
+
+    def get_worst(self, s: int) -&gt; Ind:
+        &#34;&#34;&#34;Return the index of the least fit individual in the population.&#34;&#34;&#34;
+        return min(self.pop[s], key=attrgetter(&#34;fitness&#34;))
+
+    def get_best(self, s: int) -&gt; Ind:
+        &#34;&#34;&#34;Return the index of the best individual in the population.&#34;&#34;&#34;
+        return max(self.pop[s], key=attrgetter(&#34;fitness&#34;))
+
+    def get_best_fit(self, s: int) -&gt; float:
+        &#34;&#34;&#34;Return the fitness of the best individual in a given species.&#34;&#34;&#34;
+        return self.get_best(s).fitness
+
+    def get_avg_fit(self, s: int) -&gt; float:
+        &#34;&#34;&#34;Return the average fitness of a given species.&#34;&#34;&#34;
+        fitnesses: list[float] = [p.fitness for p in self.pop[s]]
+        mean = np.mean(fitnesses)
+        return float(mean)
+
+    def print_archive(self, s: int) -&gt; None:
+        &#34;&#34;&#34;Print the archived individuals.&#34;&#34;&#34;
+        for p in self.archive[s]:
+            logger.info(p.to_string())
+
+    def print_pop(self) -&gt; None:
+        &#34;&#34;&#34;Print the current populations.&#34;&#34;&#34;
+        for s in range(Cons.S):
+            logger.info(&#34;Species %d&#34;, s)
+            for p in self.pop[s]:
+                logger.info(&#34;%s&#34;, p.to_string())
+
+    def run_ea(
+        self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray, pavg: np.ndarray
+    ) -&gt; None:
+        &#34;&#34;&#34;Execute a standard EA - partnering with the best candidates.&#34;&#34;&#34;
+        while self.evals &lt; Cons.MAX_EVALS:
+            for s in range(Cons.S):
+                parent1 = self.__tournament(s)
+                parent2 = self.__tournament(s)
+                child = self.__create_offspring(parent1, parent2)
+                team = self.__get_team_best(s, child)
+                self.__eval_team(nkcs, team)
+                self.__add_offspring(s, child)
+                self.update_perf(evals, pbest, pavg)
+
+    def __create_candidates(self, s: int) -&gt; np.ndarray:
+        &#34;&#34;&#34;Return M offspring genomes generated by 2 parents.&#34;&#34;&#34;
+        p1: Ind = self.__tournament(s)
+        p2: Ind = self.__tournament(s)
+        return np.asarray(
+            [self.__create_offspring(p1, p2).genome for _ in range(Cons.M)]
+        )
+
+    def run_sea(
+        self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray, pavg: np.ndarray
+    ) -&gt; None:
+        &#34;&#34;&#34;Execute a surrogate-assisted EA.&#34;&#34;&#34;
+        while self.evals &lt; Cons.MAX_EVALS:
+            for s in range(Cons.S):
+                X_train = np.asarray([p.genome for p in self.archive[s]])
+                y_train = np.asarray([p.fitness for p in self.archive[s]])
+                X_predict = self.__create_candidates(s)
+                model = Model()
+                model.fit(X_train, y_train)
+                scores = model.score(X_predict)
+                # evaluate single best candidate
+                child = Ind()
+                child.genome = np.copy(X_predict[np.argmax(scores)])
+                team = self.__get_team_best(s, child)
+                self.__eval_team(nkcs, team)
+                self.__add_offspring(s, child)
+                self.update_perf(evals, pbest, pavg)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="nkcs.ea.EA"><code class="flex name class">
+<span>class <span class="ident">EA</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>NKCS evolutionary algorithm.</p>
+<p>Initialise the evolutionary algorithm.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EA:
+    &#34;&#34;&#34;NKCS evolutionary algorithm.&#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
+        &#34;&#34;&#34;Initialise the evolutionary algorithm.&#34;&#34;&#34;
+        self.evals: int = 0  #: number of evaluations performed
+        self.archive: list[list[Ind]] = [[] for _ in range(Cons.S)]  #: archive
+        self.pop: list[list[Ind]] = []  #: current species populations
+
+    def run_initial(self, nkcs: NKCS) -&gt; None:
+        &#34;&#34;&#34;Generate new random initial populations.&#34;&#34;&#34;
+        # create the initial populations
+        for _ in range(Cons.S):
+            species = [Ind() for _ in range(Cons.P)]
+            self.pop.append(species)
+        # select random initial partners
+        rpartners: list[Ind] = []
+        team: list[Ind] = []
+        for s in range(Cons.S):
+            r = self.pop[s][np.random.randint(0, Cons.P)]
+            rpartners.append(r)
+            team.append(r)
+        # evaluate initial populations
+        for s in range(Cons.S):
+            for p in range(Cons.P):
+                team[s] = self.pop[s][p]
+                genomes = [ind.genome for ind in team]
+                team[s].fitness = nkcs.calc_team_fit(genomes)
+                self.__update_archive(s, team[s])
+                self.evals += 1
+            team[s] = rpartners[s]
+
+    def __eval_team(self, nkcs: NKCS, team: list[Ind]) -&gt; None:
+        &#34;&#34;&#34;Evaluate a candidate team.
+
+        Assign fitness to each individual if it&#39;s the best seen.
+        &#34;&#34;&#34;
+        genomes = [ind.genome for ind in team]
+        team_fit: Final[float] = nkcs.calc_team_fit(genomes)
+        for s in range(Cons.S):
+            team[s].fitness = max(team[s].fitness, team_fit)
+        self.evals += 1  # total team evals performed
+
+    def __get_team_best(self, s: int, child: Ind) -&gt; list[Ind]:
+        &#34;&#34;&#34;Return a team assembled with the best partners for a child.&#34;&#34;&#34;
+        team: list[Ind] = []
+        for sp in range(Cons.S):
+            if sp != s:
+                team.append(self.get_best(sp))
+            else:
+                team.append(child)
+        return team
+
+    def __update_archive(self, s: int, p: Ind) -&gt; None:
+        &#34;&#34;&#34;Add an evaluated individual to the species archive.&#34;&#34;&#34;
+        self.archive[s].append(p)
+        if len(self.archive[s]) &gt; Cons.MAX_ARCHIVE:
+            self.archive[s].pop(0)
+
+    def update_perf(
+        self, evals: np.ndarray, perf_best: np.ndarray, perf_avg: np.ndarray
+    ) -&gt; None:
+        &#34;&#34;&#34;Update current performance tracking.&#34;&#34;&#34;
+        if self.evals % (Cons.P * Cons.S) == 0:
+            g: Final[int] = int((self.evals / (Cons.P * Cons.S)) - 1)
+            evals[g] = self.evals
+            perf_best[g] = np.max([self.get_best_fit(s) for s in range(Cons.S)])
+            perf_avg[g] = np.mean([self.get_avg_fit(s) for s in range(Cons.S)])
+
+    def __create_offspring(self, p1: Ind, p2: Ind) -&gt; Ind:
+        &#34;&#34;&#34;Create and returns a new offspring.&#34;&#34;&#34;
+        child = deepcopy(p1)
+        child.fitness = 0
+        if np.random.uniform(low=0, high=1) &lt; Cons.P_CROSS:
+            child.uniform_crossover(p2)
+        child.mutate()
+        return child
+
+    def __add_offspring(self, s: int, child: Ind) -&gt; None:
+        &#34;&#34;&#34;Add an offspring to the population and archive.&#34;&#34;&#34;
+        if Cons.REPLACE == &#34;tournament&#34;:
+            self.pop[s].remove(self.__neg_tournament(s))
+            self.pop[s].append(deepcopy(child))
+        else:
+            worst = self.get_worst(s)
+            if worst.fitness &lt; child.fitness:
+                self.pop[s].remove(worst)
+                self.pop[s].append(deepcopy(child))
+        self.__update_archive(s, child)
+
+    def __tournament(self, s: int) -&gt; Ind:
+        &#34;&#34;&#34;Return a parent selected by tournament.&#34;&#34;&#34;
+        tournament = random.sample(self.pop[s], Cons.T_SIZE)
+        return max(tournament, key=attrgetter(&#34;fitness&#34;))
+
+    def __neg_tournament(self, s: int) -&gt; Ind:
+        &#34;&#34;&#34;Return an individual selected by negative tournament.&#34;&#34;&#34;
+        tournament = random.sample(self.pop[s], Cons.T_SIZE)
+        return min(tournament, key=attrgetter(&#34;fitness&#34;))
+
+    def get_worst(self, s: int) -&gt; Ind:
+        &#34;&#34;&#34;Return the index of the least fit individual in the population.&#34;&#34;&#34;
+        return min(self.pop[s], key=attrgetter(&#34;fitness&#34;))
+
+    def get_best(self, s: int) -&gt; Ind:
+        &#34;&#34;&#34;Return the index of the best individual in the population.&#34;&#34;&#34;
+        return max(self.pop[s], key=attrgetter(&#34;fitness&#34;))
+
+    def get_best_fit(self, s: int) -&gt; float:
+        &#34;&#34;&#34;Return the fitness of the best individual in a given species.&#34;&#34;&#34;
+        return self.get_best(s).fitness
+
+    def get_avg_fit(self, s: int) -&gt; float:
+        &#34;&#34;&#34;Return the average fitness of a given species.&#34;&#34;&#34;
+        fitnesses: list[float] = [p.fitness for p in self.pop[s]]
+        mean = np.mean(fitnesses)
+        return float(mean)
+
+    def print_archive(self, s: int) -&gt; None:
+        &#34;&#34;&#34;Print the archived individuals.&#34;&#34;&#34;
+        for p in self.archive[s]:
+            logger.info(p.to_string())
+
+    def print_pop(self) -&gt; None:
+        &#34;&#34;&#34;Print the current populations.&#34;&#34;&#34;
+        for s in range(Cons.S):
+            logger.info(&#34;Species %d&#34;, s)
+            for p in self.pop[s]:
+                logger.info(&#34;%s&#34;, p.to_string())
+
+    def run_ea(
+        self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray, pavg: np.ndarray
+    ) -&gt; None:
+        &#34;&#34;&#34;Execute a standard EA - partnering with the best candidates.&#34;&#34;&#34;
+        while self.evals &lt; Cons.MAX_EVALS:
+            for s in range(Cons.S):
+                parent1 = self.__tournament(s)
+                parent2 = self.__tournament(s)
+                child = self.__create_offspring(parent1, parent2)
+                team = self.__get_team_best(s, child)
+                self.__eval_team(nkcs, team)
+                self.__add_offspring(s, child)
+                self.update_perf(evals, pbest, pavg)
+
+    def __create_candidates(self, s: int) -&gt; np.ndarray:
+        &#34;&#34;&#34;Return M offspring genomes generated by 2 parents.&#34;&#34;&#34;
+        p1: Ind = self.__tournament(s)
+        p2: Ind = self.__tournament(s)
+        return np.asarray(
+            [self.__create_offspring(p1, p2).genome for _ in range(Cons.M)]
+        )
+
+    def run_sea(
+        self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray, pavg: np.ndarray
+    ) -&gt; None:
+        &#34;&#34;&#34;Execute a surrogate-assisted EA.&#34;&#34;&#34;
+        while self.evals &lt; Cons.MAX_EVALS:
+            for s in range(Cons.S):
+                X_train = np.asarray([p.genome for p in self.archive[s]])
+                y_train = np.asarray([p.fitness for p in self.archive[s]])
+                X_predict = self.__create_candidates(s)
+                model = Model()
+                model.fit(X_train, y_train)
+                scores = model.score(X_predict)
+                # evaluate single best candidate
+                child = Ind()
+                child.genome = np.copy(X_predict[np.argmax(scores)])
+                team = self.__get_team_best(s, child)
+                self.__eval_team(nkcs, team)
+                self.__add_offspring(s, child)
+                self.update_perf(evals, pbest, pavg)</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="nkcs.ea.EA.archive"><code class="name">var <span class="ident">archive</span></code></dt>
+<dd>
+<div class="desc"><p>archive</p></div>
+</dd>
+<dt id="nkcs.ea.EA.evals"><code class="name">var <span class="ident">evals</span></code></dt>
+<dd>
+<div class="desc"><p>number of evaluations performed</p></div>
+</dd>
+<dt id="nkcs.ea.EA.pop"><code class="name">var <span class="ident">pop</span></code></dt>
+<dd>
+<div class="desc"><p>current species populations</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nkcs.ea.EA.get_avg_fit"><code class="name flex">
+<span>def <span class="ident">get_avg_fit</span></span>(<span>self, s: int) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the average fitness of a given species.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_avg_fit(self, s: int) -&gt; float:
+    &#34;&#34;&#34;Return the average fitness of a given species.&#34;&#34;&#34;
+    fitnesses: list[float] = [p.fitness for p in self.pop[s]]
+    mean = np.mean(fitnesses)
+    return float(mean)</code></pre>
+</details>
+</dd>
+<dt id="nkcs.ea.EA.get_best"><code class="name flex">
+<span>def <span class="ident">get_best</span></span>(<span>self, s: int) ‑> <a title="nkcs.ea.Ind" href="#nkcs.ea.Ind">Ind</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the index of the best individual in the population.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_best(self, s: int) -&gt; Ind:
+    &#34;&#34;&#34;Return the index of the best individual in the population.&#34;&#34;&#34;
+    return max(self.pop[s], key=attrgetter(&#34;fitness&#34;))</code></pre>
+</details>
+</dd>
+<dt id="nkcs.ea.EA.get_best_fit"><code class="name flex">
+<span>def <span class="ident">get_best_fit</span></span>(<span>self, s: int) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the fitness of the best individual in a given species.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_best_fit(self, s: int) -&gt; float:
+    &#34;&#34;&#34;Return the fitness of the best individual in a given species.&#34;&#34;&#34;
+    return self.get_best(s).fitness</code></pre>
+</details>
+</dd>
+<dt id="nkcs.ea.EA.get_worst"><code class="name flex">
+<span>def <span class="ident">get_worst</span></span>(<span>self, s: int) ‑> <a title="nkcs.ea.Ind" href="#nkcs.ea.Ind">Ind</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the index of the least fit individual in the population.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_worst(self, s: int) -&gt; Ind:
+    &#34;&#34;&#34;Return the index of the least fit individual in the population.&#34;&#34;&#34;
+    return min(self.pop[s], key=attrgetter(&#34;fitness&#34;))</code></pre>
+</details>
+</dd>
+<dt id="nkcs.ea.EA.print_archive"><code class="name flex">
+<span>def <span class="ident">print_archive</span></span>(<span>self, s: int) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Print the archived individuals.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def print_archive(self, s: int) -&gt; None:
+    &#34;&#34;&#34;Print the archived individuals.&#34;&#34;&#34;
+    for p in self.archive[s]:
+        logger.info(p.to_string())</code></pre>
+</details>
+</dd>
+<dt id="nkcs.ea.EA.print_pop"><code class="name flex">
+<span>def <span class="ident">print_pop</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Print the current populations.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def print_pop(self) -&gt; None:
+    &#34;&#34;&#34;Print the current populations.&#34;&#34;&#34;
+    for s in range(Cons.S):
+        logger.info(&#34;Species %d&#34;, s)
+        for p in self.pop[s]:
+            logger.info(&#34;%s&#34;, p.to_string())</code></pre>
+</details>
+</dd>
+<dt id="nkcs.ea.EA.run_ea"><code class="name flex">
+<span>def <span class="ident">run_ea</span></span>(<span>self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray, pavg: np.ndarray) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute a standard EA - partnering with the best candidates.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_ea(
+    self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray, pavg: np.ndarray
+) -&gt; None:
+    &#34;&#34;&#34;Execute a standard EA - partnering with the best candidates.&#34;&#34;&#34;
+    while self.evals &lt; Cons.MAX_EVALS:
+        for s in range(Cons.S):
+            parent1 = self.__tournament(s)
+            parent2 = self.__tournament(s)
+            child = self.__create_offspring(parent1, parent2)
+            team = self.__get_team_best(s, child)
+            self.__eval_team(nkcs, team)
+            self.__add_offspring(s, child)
+            self.update_perf(evals, pbest, pavg)</code></pre>
+</details>
+</dd>
+<dt id="nkcs.ea.EA.run_initial"><code class="name flex">
+<span>def <span class="ident">run_initial</span></span>(<span>self, nkcs: NKCS) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate new random initial populations.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_initial(self, nkcs: NKCS) -&gt; None:
+    &#34;&#34;&#34;Generate new random initial populations.&#34;&#34;&#34;
+    # create the initial populations
+    for _ in range(Cons.S):
+        species = [Ind() for _ in range(Cons.P)]
+        self.pop.append(species)
+    # select random initial partners
+    rpartners: list[Ind] = []
+    team: list[Ind] = []
+    for s in range(Cons.S):
+        r = self.pop[s][np.random.randint(0, Cons.P)]
+        rpartners.append(r)
+        team.append(r)
+    # evaluate initial populations
+    for s in range(Cons.S):
+        for p in range(Cons.P):
+            team[s] = self.pop[s][p]
+            genomes = [ind.genome for ind in team]
+            team[s].fitness = nkcs.calc_team_fit(genomes)
+            self.__update_archive(s, team[s])
+            self.evals += 1
+        team[s] = rpartners[s]</code></pre>
+</details>
+</dd>
+<dt id="nkcs.ea.EA.run_sea"><code class="name flex">
+<span>def <span class="ident">run_sea</span></span>(<span>self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray, pavg: np.ndarray) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute a surrogate-assisted EA.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_sea(
+    self, nkcs: NKCS, evals: np.ndarray, pbest: np.ndarray, pavg: np.ndarray
+) -&gt; None:
+    &#34;&#34;&#34;Execute a surrogate-assisted EA.&#34;&#34;&#34;
+    while self.evals &lt; Cons.MAX_EVALS:
+        for s in range(Cons.S):
+            X_train = np.asarray([p.genome for p in self.archive[s]])
+            y_train = np.asarray([p.fitness for p in self.archive[s]])
+            X_predict = self.__create_candidates(s)
+            model = Model()
+            model.fit(X_train, y_train)
+            scores = model.score(X_predict)
+            # evaluate single best candidate
+            child = Ind()
+            child.genome = np.copy(X_predict[np.argmax(scores)])
+            team = self.__get_team_best(s, child)
+            self.__eval_team(nkcs, team)
+            self.__add_offspring(s, child)
+            self.update_perf(evals, pbest, pavg)</code></pre>
+</details>
+</dd>
+<dt id="nkcs.ea.EA.update_perf"><code class="name flex">
+<span>def <span class="ident">update_perf</span></span>(<span>self, evals: np.ndarray, perf_best: np.ndarray, perf_avg: np.ndarray) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Update current performance tracking.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_perf(
+    self, evals: np.ndarray, perf_best: np.ndarray, perf_avg: np.ndarray
+) -&gt; None:
+    &#34;&#34;&#34;Update current performance tracking.&#34;&#34;&#34;
+    if self.evals % (Cons.P * Cons.S) == 0:
+        g: Final[int] = int((self.evals / (Cons.P * Cons.S)) - 1)
+        evals[g] = self.evals
+        perf_best[g] = np.max([self.get_best_fit(s) for s in range(Cons.S)])
+        perf_avg[g] = np.mean([self.get_avg_fit(s) for s in range(Cons.S)])</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nkcs.ea.Ind"><code class="flex name class">
+<span>class <span class="ident">Ind</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>A binary NKCS individual within an evolutionary algorithm.</p>
+<p>Initialise a random individual.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Ind:
+    &#34;&#34;&#34;A binary NKCS individual within an evolutionary algorithm.&#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
+        &#34;&#34;&#34;Initialise a random individual.&#34;&#34;&#34;
+        self.fitness: float = 0  #: fitness
+        self.genome: np.ndarray = np.random.randint(2, size=Cons.N)  #: genome
+
+    def to_string(self) -&gt; str:
+        &#34;&#34;&#34;Return a string representation of an individual.&#34;&#34;&#34;
+        return (
+            &#34;,&#34;.join([str(gene) for gene in self.genome]) + f&#34;,{self.fitness}&#34;
+        )
+
+    def mutate(self) -&gt; None:
+        &#34;&#34;&#34;Mutate an individual.&#34;&#34;&#34;
+        for i, gene in enumerate(self.genome):
+            if np.random.uniform(low=0, high=1) &lt; Cons.P_MUT:
+                self.genome[i] = 1 if gene == 0 else 1
+
+    def uniform_crossover(self, parent: Ind) -&gt; None:
+        &#34;&#34;&#34;Perform uniform crossover.&#34;&#34;&#34;
+        for i in range(len(self.genome)):
+            if np.random.randint(2):
+                self.genome[i] = parent.genome[i]</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="nkcs.ea.Ind.fitness"><code class="name">var <span class="ident">fitness</span></code></dt>
+<dd>
+<div class="desc"><p>fitness</p></div>
+</dd>
+<dt id="nkcs.ea.Ind.genome"><code class="name">var <span class="ident">genome</span></code></dt>
+<dd>
+<div class="desc"><p>genome</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nkcs.ea.Ind.mutate"><code class="name flex">
+<span>def <span class="ident">mutate</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Mutate an individual.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mutate(self) -&gt; None:
+    &#34;&#34;&#34;Mutate an individual.&#34;&#34;&#34;
+    for i, gene in enumerate(self.genome):
+        if np.random.uniform(low=0, high=1) &lt; Cons.P_MUT:
+            self.genome[i] = 1 if gene == 0 else 1</code></pre>
+</details>
+</dd>
+<dt id="nkcs.ea.Ind.to_string"><code class="name flex">
+<span>def <span class="ident">to_string</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a string representation of an individual.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_string(self) -&gt; str:
+    &#34;&#34;&#34;Return a string representation of an individual.&#34;&#34;&#34;
+    return (
+        &#34;,&#34;.join([str(gene) for gene in self.genome]) + f&#34;,{self.fitness}&#34;
+    )</code></pre>
+</details>
+</dd>
+<dt id="nkcs.ea.Ind.uniform_crossover"><code class="name flex">
+<span>def <span class="ident">uniform_crossover</span></span>(<span>self, parent: <a title="nkcs.ea.Ind" href="#nkcs.ea.Ind">Ind</a>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Perform uniform crossover.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def uniform_crossover(self, parent: Ind) -&gt; None:
+    &#34;&#34;&#34;Perform uniform crossover.&#34;&#34;&#34;
+    for i in range(len(self.genome)):
+        if np.random.randint(2):
+            self.genome[i] = parent.genome[i]</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="nkcs" href="index.html">nkcs</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="nkcs.ea.EA" href="#nkcs.ea.EA">EA</a></code></h4>
+<ul class="two-column">
+<li><code><a title="nkcs.ea.EA.archive" href="#nkcs.ea.EA.archive">archive</a></code></li>
+<li><code><a title="nkcs.ea.EA.evals" href="#nkcs.ea.EA.evals">evals</a></code></li>
+<li><code><a title="nkcs.ea.EA.get_avg_fit" href="#nkcs.ea.EA.get_avg_fit">get_avg_fit</a></code></li>
+<li><code><a title="nkcs.ea.EA.get_best" href="#nkcs.ea.EA.get_best">get_best</a></code></li>
+<li><code><a title="nkcs.ea.EA.get_best_fit" href="#nkcs.ea.EA.get_best_fit">get_best_fit</a></code></li>
+<li><code><a title="nkcs.ea.EA.get_worst" href="#nkcs.ea.EA.get_worst">get_worst</a></code></li>
+<li><code><a title="nkcs.ea.EA.pop" href="#nkcs.ea.EA.pop">pop</a></code></li>
+<li><code><a title="nkcs.ea.EA.print_archive" href="#nkcs.ea.EA.print_archive">print_archive</a></code></li>
+<li><code><a title="nkcs.ea.EA.print_pop" href="#nkcs.ea.EA.print_pop">print_pop</a></code></li>
+<li><code><a title="nkcs.ea.EA.run_ea" href="#nkcs.ea.EA.run_ea">run_ea</a></code></li>
+<li><code><a title="nkcs.ea.EA.run_initial" href="#nkcs.ea.EA.run_initial">run_initial</a></code></li>
+<li><code><a title="nkcs.ea.EA.run_sea" href="#nkcs.ea.EA.run_sea">run_sea</a></code></li>
+<li><code><a title="nkcs.ea.EA.update_perf" href="#nkcs.ea.EA.update_perf">update_perf</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nkcs.ea.Ind" href="#nkcs.ea.Ind">Ind</a></code></h4>
+<ul class="">
+<li><code><a title="nkcs.ea.Ind.fitness" href="#nkcs.ea.Ind.fitness">fitness</a></code></li>
+<li><code><a title="nkcs.ea.Ind.genome" href="#nkcs.ea.Ind.genome">genome</a></code></li>
+<li><code><a title="nkcs.ea.Ind.mutate" href="#nkcs.ea.Ind.mutate">mutate</a></code></li>
+<li><code><a title="nkcs.ea.Ind.to_string" href="#nkcs.ea.Ind.to_string">to_string</a></code></li>
+<li><code><a title="nkcs.ea.Ind.uniform_crossover" href="#nkcs.ea.Ind.uniform_crossover">uniform_crossover</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
